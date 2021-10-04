@@ -12,7 +12,7 @@ public class unreal_positional : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
-		PublicIncludePaths.Add(@"C:\Users\Jonathan\Documents\Repos\unreal_positional\Source\unreal_positional\positional\src");
+		PublicIncludePaths.Add(@"unreal_positional\positional\src");
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
