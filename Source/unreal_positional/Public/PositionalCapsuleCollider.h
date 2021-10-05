@@ -26,6 +26,6 @@ public:
 	UPositionalCapsuleCollider();
 
 protected:
-	virtual Store<Collider>::Ref CreateCollider(APositionalWorld* world, APositionalRigidBody* body, const FTransform& transform) override;
+	virtual Ref<Collider> CreateCollider(APositionalWorld* world, APositionalRigidBody* body, const FTransform& transform) override;
 	virtual void SyncTransform(const FTransform& transform) override;
 };

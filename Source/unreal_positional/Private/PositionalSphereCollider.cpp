@@ -11,7 +11,7 @@ UPositionalSphereCollider::UPositionalSphereCollider()
 	Radius = 50.0f;
 }
 
-Store<Collider>::Ref UPositionalSphereCollider::CreateCollider(APositionalWorld* world, APositionalRigidBody* body, const FTransform& transform)
+Ref<Collider> UPositionalSphereCollider::CreateCollider(APositionalWorld* world, APositionalRigidBody* body, const FTransform& transform)
 {
 	const auto pos = transform.GetTranslation() + Center;
 	return world->CreateSphereCollider(body, this, pos, Radius, Density, StaticFriction, DynamicFriction, Bounciness);

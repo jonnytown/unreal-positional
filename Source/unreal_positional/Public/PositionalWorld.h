@@ -84,13 +84,13 @@ public:
 	void Raycast(const FVector& rayOrigin, const FVector& rayNormal, const unsigned int& mask, const float& maxDistance, TArray<PositionalRaycastResult> &results) const;
 
 protected:
-	Store<Body>::Ref CreateRigidBody(APositionalRigidBody* body, const FVector& pos, const FQuat& rot);
-	void DestroyRigidBody(const Store<Body>::Ref& ptr);
+	Ref<Body> CreateRigidBody(APositionalRigidBody* body, const FVector& pos, const FQuat& rot);
+	void DestroyRigidBody(const Ref<Body>& ptr);
 
-	Store<Collider>::Ref CreateSphereCollider(APositionalRigidBody *body, UPositionalCollider* component, const FVector &pos, const float &radius, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness);
-	Store<Collider>::Ref CreateCapsuleCollider(APositionalRigidBody* body, UPositionalCollider* component, const FVector& pos, const FQuat& rot, const float& radius, const float& length, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness);
-	Store<Collider>::Ref CreateBoxCollider(APositionalRigidBody* body, UPositionalCollider* component, const FVector& pos, const FQuat& rot, const FVector& extents, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness);
-	void DestroyCollider(const Store<Collider>::Ref& ptr);
+	Ref<Collider> CreateSphereCollider(APositionalRigidBody *body, UPositionalCollider* component, const FVector &pos, const float &radius, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness);
+	Ref<Collider> CreateCapsuleCollider(APositionalRigidBody* body, UPositionalCollider* component, const FVector& pos, const FQuat& rot, const float& radius, const float& length, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness);
+	Ref<Collider> CreateBoxCollider(APositionalRigidBody* body, UPositionalCollider* component, const FVector& pos, const FQuat& rot, const FVector& extents, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness);
+	void DestroyCollider(const Ref<Collider>& ptr);
 
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

@@ -12,7 +12,7 @@ UPositionalCapsuleCollider::UPositionalCapsuleCollider()
 	Length = 100;
 }
 
-Store<Collider>::Ref UPositionalCapsuleCollider::CreateCollider(APositionalWorld* world, APositionalRigidBody* body, const FTransform& transform)
+Ref<Collider> UPositionalCapsuleCollider::CreateCollider(APositionalWorld* world, APositionalRigidBody* body, const FTransform& transform)
 {
 	const auto pos = transform.GetTranslation() + Center;
 	const auto rot = FQuat(Rotation) * transform.GetRotation();

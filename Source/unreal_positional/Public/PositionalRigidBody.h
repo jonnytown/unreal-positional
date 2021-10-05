@@ -23,11 +23,11 @@ public:
 	APositionalRigidBody();
 
 protected:
-	Store<Body>::Ref m_Body;
+	Ref<Body> m_Body;
 	TSoftObjectPtr<APositionalWorld> m_PrevWorld;
 
 
-	Store<Body>::Ref GetPtr() const { return m_Body; }
+	Ref<Body> GetPtr() const { return m_Body; }
 	void CreateBody(TSoftObjectPtr<APositionalWorld>& world);
 	void DestroyBody(TSoftObjectPtr<APositionalWorld>& world);
 

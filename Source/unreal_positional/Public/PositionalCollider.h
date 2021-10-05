@@ -40,7 +40,7 @@ public:
 	UPositionalCollider();
 
 protected:
-	Store<Collider>::Ref m_Collider;
+	Ref<Collider> m_Collider;
 	TSoftObjectPtr<APositionalWorld> m_PrevWorld;
 
 	FTransform GetRelativeTransform() const;
@@ -49,10 +49,10 @@ protected:
 		UE_LOG(LogPositional, Fatal, TEXT("SyncTransform not implemented!"));
 	}
 
-	virtual Store<Collider>::Ref CreateCollider(APositionalWorld *world, APositionalRigidBody *body, const FTransform& transform)
+	virtual Ref<Collider> CreateCollider(APositionalWorld *world, APositionalRigidBody *body, const FTransform& transform)
 	{ 
 		UE_LOG(LogPositional, Fatal, TEXT("CreateCollider not implemented!"));
-		return Store<Collider>::Ref();
+		return Ref<Collider>();
 	}
 
 	void CreateCollider(const TSoftObjectPtr<APositionalWorld> &world);

@@ -12,7 +12,7 @@ UPositionalBoxCollider::UPositionalBoxCollider()
 }
 
 
-Store<Collider>::Ref UPositionalBoxCollider::CreateCollider(APositionalWorld* world, APositionalRigidBody* body, const FTransform& transform)
+Ref<Collider> UPositionalBoxCollider::CreateCollider(APositionalWorld* world, APositionalRigidBody* body, const FTransform& transform)
 {
 	const auto pos = transform.GetTranslation() + Center;
 	const auto rot = FQuat(Rotation) * transform.GetRotation();

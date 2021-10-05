@@ -129,7 +129,7 @@ void APositionalWorld::Tick(float dt)
 
 	if (ShowDebugCollisionCSOs)
 	{
-		m_World->forEachBroadPair([&, this](const std::pair<Store<Collider>::Ref, Store<Collider>::Ref>& pair)
+		m_World->forEachBroadPair([&, this](const std::pair<Ref<Collider>, Ref<Collider>>& pair)
 		{
 			if (pair.first.valid() && pair.second.valid())
 			{
@@ -162,7 +162,7 @@ void APositionalWorld::Tick(float dt)
 
 	if (ShowDebugMassProperties)
 	{
-		m_World->forEachBody([&, this](const Store<Body>::Ref& ref)
+		m_World->forEachBody([&, this](const Ref<Body>& ref)
 		{
 			const Body& body = ref.get();
 			auto com = ToFVector(body.pose.transform(body.massPose.position));
@@ -215,41 +215,41 @@ void APositionalWorld::Raycast(const FVector& rayOrigin, const FVector& rayNorma
 }
 
 
-Store<Body>::Ref APositionalWorld::CreateRigidBody(APositionalRigidBody* actor, const FVector& pos, const FQuat& rot)
+Ref<Body> APositionalWorld::CreateRigidBody(APositionalRigidBody* actor, const FVector& pos, const FQuat& rot)
 {
 	auto ptr = m_World->createBody<RigidBody>(ToVec3(pos), ToQuat(rot));
 	m_RigidBodies.Add(ptr.id(), actor);
 	return ptr;
 }
 
-void APositionalWorld::DestroyRigidBody(const Store<Body>::Ref& ptr)
+void APositionalWorld::DestroyRigidBody(const Ref<Body>& ptr)
 {
 	m_RigidBodies.Remove(ptr.id());
 	m_World->destroyBody(ptr);
 }
 
-Store<Collider>::Ref APositionalWorld::CreateSphereCollider(APositionalRigidBody* body, UPositionalCollider* component, const FVector& pos, const float& radius, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness)
+Ref<Collider> APositionalWorld::CreateSphereCollider(APositionalRigidBody* body, UPositionalCollider* component, const FVector& pos, const float& radius, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness)
 {
 	auto ptr = m_World->createSphereCollider(body ? body->GetPtr() : Body::null, ToVec3(pos), radius, density, staticFriction, dynamicFriction, bounciness);
 	m_Colliders.Add(ptr.id(), component);
 	return ptr;
 }
 
-Store<Collider>::Ref APositionalWorld::CreateCapsuleCollider(APositionalRigidBody* body, UPositionalCollider* component, const FVector& pos, const FQuat& rot, const float& radius, const float& length, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness)
+Ref<Collider> APositionalWorld::CreateCapsuleCollider(APositionalRigidBody* body, UPositionalCollider* component, const FVector& pos, const FQuat& rot, const float& radius, const float& length, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness)
 {
 	auto ptr = m_World->createCapsuleCollider(body ? body->GetPtr() : Body::null, ToVec3(pos), ToQuat(rot), radius, length, density, staticFriction, dynamicFriction, bounciness);
 	m_Colliders.Add(ptr.id(), component);
 	return ptr;
 }
 
-Store<Collider>::Ref APositionalWorld::CreateBoxCollider(APositionalRigidBody* body, UPositionalCollider* component, const FVector& pos, const FQuat& rot, const FVector& extents, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness)
+Ref<Collider> APositionalWorld::CreateBoxCollider(APositionalRigidBody* body, UPositionalCollider* component, const FVector& pos, const FQuat& rot, const FVector& extents, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness)
 {
 	auto ptr = m_World->createBoxCollider(body ? body->GetPtr() : Body::null, ToVec3(pos), ToQuat(rot), ToVec3(extents), density, staticFriction, dynamicFriction, bounciness);
 	m_Colliders.Add(ptr.id(), component);
 	return ptr;
 }
 
-void APositionalWorld::DestroyCollider(const Store<Collider>::Ref &ptr)
+void APositionalWorld::DestroyCollider(const Ref<Collider> &ptr)
 {
 	m_Colliders.Remove(ptr.id());
 	if (ptr.valid())
