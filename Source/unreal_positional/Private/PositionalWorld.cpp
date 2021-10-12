@@ -16,7 +16,7 @@ APositionalWorld::APositionalWorld()
 	DeltaTime = 0.0166666666667;
 	SubSteps = 20;
 
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 
@@ -97,6 +97,24 @@ void APositionalWorld::Tick(float dt)
 		});
 	}
 
+	if (ShowDebugVelocities)
+	{
+		m_World->forEachBody([&, this](const Ref<Body>& ref)
+		{
+			const Body &body = ref.get();
+			auto com = body.pose.transform(body.massPose.position);
+			DrawDebugDirectionalArrow(
+					GetWorld(),
+					ToFVector(com),
+					ToFVector(com + body.velocity.linear),
+					10,
+					FColor::Black,
+					false,
+					-1,
+					2);
+		});
+	}
+
 	if (ShowDebugCollisions)
 	{
 		m_World->forEachCollision([&, this](const CollisionResult& collision)
@@ -123,6 +141,7 @@ void APositionalWorld::Tick(float dt)
 					2);
 				DrawDebugPoint(GetWorld(), ToFVector(a), 5, FColor::Blue, false, -1, 2);
 				DrawDebugPoint(GetWorld(), ToFVector(b), 5, FColor::Green, false, -1, 2);
+				
 			}
 		});
 	}
@@ -177,7 +196,7 @@ void APositionalWorld::Tick(float dt)
 			}
 		});
 	}
-	
+
 #endif // WITH_EDITOR
 }
 

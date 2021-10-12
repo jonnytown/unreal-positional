@@ -63,6 +63,9 @@ public:
 		bool ShowDebugBoundsTree;
 
 	UPROPERTY(EditAnywhere)
+		bool ShowDebugVelocities;
+
+	UPROPERTY(EditAnywhere)
 		bool ShowDebugCollisions;
 
 	UPROPERTY(EditAnywhere)
