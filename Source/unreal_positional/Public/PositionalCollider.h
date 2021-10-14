@@ -61,7 +61,9 @@ protected:
 public:	
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif //WITH_EDITOR
 
 	bool Raycast(const FVector& rayOrigin, const FVector& rayNormal, const float& maxDistance, FVector& outPoint, FVector& outNormal, float& outDistance);
 	void GetBounds(FVector& outCenter, FVector& outExtents);

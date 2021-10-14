@@ -8,7 +8,6 @@
 #include "EngineUtils.h"
 #include "PositionalWorld.generated.h"
 
-
 DECLARE_LOG_CATEGORY_EXTERN(LogPositional, Log, All);
 
 using namespace Positional;

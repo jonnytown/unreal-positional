@@ -35,7 +35,9 @@ protected:
 public:	
 	virtual void PreRegisterAllComponents() override;
 	virtual void PostUnregisterAllComponents() override;
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif // WITH_EDITOR
 
 	void SyncTransform();
 };

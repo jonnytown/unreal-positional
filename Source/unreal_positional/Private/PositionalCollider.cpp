@@ -57,6 +57,7 @@ void UPositionalCollider::DestroyCollider(const TSoftObjectPtr<APositionalWorld>
 	}
 }
 
+#if WITH_EDITOR
 void UPositionalCollider::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -97,6 +98,7 @@ void UPositionalCollider::PostEditChangeProperty(FPropertyChangedEvent& Property
 		return;
 	}
 }
+#endif // WITH_EDITOR
 
 FTransform UPositionalCollider::GetRelativeTransform() const
 {

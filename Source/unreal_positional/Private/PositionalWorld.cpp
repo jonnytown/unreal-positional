@@ -63,7 +63,7 @@ void APositionalWorld::FireSimulation()
 			}
 		} else
 #endif // WITH_EDITOR
-		Simulate();
+			Simulate();
 	}
 }
 
@@ -141,7 +141,6 @@ void APositionalWorld::Tick(float dt)
 					2);
 				DrawDebugPoint(GetWorld(), ToFVector(a), 5, FColor::Blue, false, -1, 2);
 				DrawDebugPoint(GetWorld(), ToFVector(b), 5, FColor::Green, false, -1, 2);
-				
 			}
 		});
 	}

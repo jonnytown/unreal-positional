@@ -49,6 +49,7 @@ void APositionalRigidBody::PostUnregisterAllComponents()
 	DestroyBody(World);
 }
 
+#if WITH_EDITOR
 void APositionalRigidBody::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -63,6 +64,7 @@ void APositionalRigidBody::PostEditChangeProperty(FPropertyChangedEvent& Propert
 		m_PrevWorld = World;
 	}
 }
+#endif // WITH_EDITOR
 
 void APositionalRigidBody::SyncTransform()
 {
