@@ -4,6 +4,7 @@
 #include "GJK_EPA_CollisionTest.h"
 #include "PositionalUtil.h"
 #include "collision/narrowphase/Simplex.h"
+#include "collision/narrowphase/Penetration.h"
 
 namespace Positional
 {
