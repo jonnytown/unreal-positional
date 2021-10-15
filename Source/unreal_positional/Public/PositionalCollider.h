@@ -8,9 +8,7 @@
 #include "PositionalRigidBody.h"
 #include "PositionalCollider.generated.h"
 
-
-
-UCLASS( ClassGroup=(Custom), Abstract )
+UCLASS(ClassGroup = (Custom), Abstract)
 class UNREAL_POSITIONAL_API UPositionalCollider : public UActorComponent
 {
 	friend class APositionalWorld;
@@ -22,16 +20,16 @@ public:
 		TSoftObjectPtr<APositionalWorld> World;
 
 	UPROPERTY(EditAnywhere)
-		float Density;
+		double Density;
 
 	UPROPERTY(EditAnywhere)
-		float StaticFriction;
+		double StaticFriction;
 
 	UPROPERTY(EditAnywhere)
-		float DynamicFriction;
+		double DynamicFriction;
 
 	UPROPERTY(EditAnywhere)
-		float Bounciness;
+		double Bounciness;
 
 	UPROPERTY(EditAnywhere)
 		FVector Center;

@@ -27,7 +27,7 @@ protected:
 	TSoftObjectPtr<APositionalWorld> m_PrevWorld;
 
 
-	Ref<Body> GetPtr() const { return m_Body; }
+	Ref<Body> GetRef() const { return m_Body; }
 	void CreateBody(TSoftObjectPtr<APositionalWorld>& world);
 	void DestroyBody(TSoftObjectPtr<APositionalWorld>& world);
 

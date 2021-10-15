@@ -13,10 +13,10 @@ UPositionalCollider::UPositionalCollider()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
-	Density = 0.0012F;
-	StaticFriction = 0.5F;
-	DynamicFriction = 0.5F;
-	Bounciness = 0.2F;
+	Density = 0.0012;
+	StaticFriction = 0.5;
+	DynamicFriction = 0.0;
+	Bounciness = 0.2;
 }
 
 void UPositionalCollider::OnRegister()
