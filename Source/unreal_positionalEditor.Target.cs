@@ -9,6 +9,6 @@ public class unreal_positionalEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
-		ExtraModuleNames.AddRange( new string[] { "unreal_positional" } );
+		ExtraModuleNames.AddRange( new string[] { "unreal_positional", "unreal_positional_editor" } );
 	}
 }

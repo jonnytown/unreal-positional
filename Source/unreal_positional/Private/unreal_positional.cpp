@@ -4,3 +4,5 @@
 #include "Modules/ModuleManager.h"
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, unreal_positional, "unreal_positional" );
+
+DEFINE_LOG_CATEGORY(LogPositional);

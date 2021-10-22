@@ -9,8 +9,6 @@
 #include "PositionalConstraint.h"
 #include "collision/narrowphase/Penetration.h"
 
-DEFINE_LOG_CATEGORY(LogPositional);
-
 // Sets default values
 APositionalWorld::APositionalWorld()
 {

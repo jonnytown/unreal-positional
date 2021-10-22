@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "unreal_positional.h"
 #include "Components/ActorComponent.h"
 #include "PositionalWorld.h"
 #include "PositionalRigidBody.h"
