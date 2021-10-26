@@ -1,5 +1,7 @@
 #include "unreal_positional_editor.h"
 #include "PositionalGenericJointVisualizer.h"
+#include "Editor/UnrealEd/Classes/Editor/UnrealEdEngine.h"
+#include "UnrealEdGlobals.h"
 
 IMPLEMENT_GAME_MODULE(FPositionalEditorModule, unreal_positional_editor);
 

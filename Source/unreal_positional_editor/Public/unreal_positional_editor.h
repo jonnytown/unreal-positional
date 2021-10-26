@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Engine.h"
-#include "UnrealEd.h"
+#include "CoreMinimal.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(PositionalEditor, All, All);
 
