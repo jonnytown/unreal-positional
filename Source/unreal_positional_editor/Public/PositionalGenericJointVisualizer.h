@@ -7,6 +7,7 @@
 #include "PositionalGenericJoint.h"
 #include "PositionalGenericJointVisualizer.generated.h"
 
+class FUICommandList;
 /**
  * 
  */
@@ -56,6 +57,7 @@ public:
 	virtual ~FPositionalGenericJointVisualizer();
 
     // Begin FComponentVisualizer interface
+    virtual void OnRegister() override;
     virtual void DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI) override;
     virtual bool VisProxyHandleClick(FEditorViewportClient* InViewportClient, HComponentVisProxy* VisProxy, const FViewportClick& Click) override;
     virtual UActorComponent* GetEditedComponent() const override;
@@ -63,16 +65,26 @@ public:
     virtual bool GetCustomInputCoordinateSystem(const FEditorViewportClient *ViewportClient, FMatrix &OutMatrix) const override;
     virtual bool HandleInputDelta(FEditorViewportClient *ViewportClient, FViewport *Viewport, FVector &DeltaTranslate, FRotator &DeltaRotate, FVector &DeltaScale) override;
     virtual void EndEditing() override;
+    virtual TSharedPtr<SWidget> GenerateContextMenu() const override;
+    virtual bool HandleInputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event) override;
     // End FComponentVisualizer interface
 
     // Begin FComponentVisualizer interface
-    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+    virtual void AddReferencedObjects(FReferenceCollector &Collector) override;
     // End FComponentVisualizer interface
 
 private:
     void DrawAnchor(FPrimitiveDrawInterface *PDI, const FTransform &transform, const FVector &anchorPos, const FQuat &anchorRot, const FLinearColor &color);
+    FTransform GetBodyTransform(const UPositionalGenericJoint *joint, const uint8 &anchor) const;
+    FVector GetAnchorPosition(const UPositionalGenericJoint *joint, const uint8 &anchor) const;
+    FQuat GetAnchorRotation(const UPositionalGenericJoint *joint, const uint8 &anchor) const;
+    FStructProperty * GetAnchorPositionProperty(const UPositionalGenericJoint *joint, const uint8 &anchor) const;
+    FStructProperty * GetAnchorRotationProperty(const UPositionalGenericJoint *joint, const uint8 &anchor) const;
+    void OnSnapAnchor();
+    bool CanSnapAnchor() const;
 
     UAnchorSelectionState *m_Selection;
+    TSharedPtr<FUICommandList> m_Actions;
 };
 
 struct HAnchorProxy : public HComponentVisProxy

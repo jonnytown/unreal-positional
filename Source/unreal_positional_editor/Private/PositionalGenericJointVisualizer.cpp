@@ -4,19 +4,54 @@
 #include "PositionalGenericJointVisualizer.h"
 #include "SceneManagement.h"
 #include "HitProxies.h"
-#include "EditorViewportClient.h"
 #include "ScopedTransaction.h"
+#include "Framework/Commands/Commands.h"
+#include "Framework/Commands/InputChord.h"
+#include "Framework/Commands/UICommandList.h"
+#include "Framework/Commands/UIAction.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Editor.h"
+#include "EditorViewportClient.h"
+#include "EditorViewportCommands.h"
+#include "EditorStyleSet.h"
+#include "Widgets/SWidget.h"
 
+#define LOCTEXT_NAMESPACE "PositionalGenericJointVisualizer"
 IMPLEMENT_HIT_PROXY(HAnchorProxy, HComponentVisProxy);
+
+class FPositionalGenericJointVisualizerCommands : public TCommands<FPositionalGenericJointVisualizerCommands>
+{
+public:
+	FPositionalGenericJointVisualizerCommands() 
+		: TCommands<FPositionalGenericJointVisualizerCommands>(
+			"PositionalGenericJointVisualizer",				// Context name for fast lookup
+			INVTEXT("Positional Generic Joint Visualizer"), // Invariant context name for displaying
+			NAME_None,										// Parent
+			FEditorStyle::GetStyleSetName())
+	{
+	}
+
+	virtual void RegisterCommands() override
+	{
+		UI_COMMAND(SnapAnchor, "Snap to Other", "Snap the currently selected anchor to the other one.", EUserInterfaceActionType::Button, FInputChord(EKeys::S));
+	}
+
+public:
+	/** Snap anchor */
+	TSharedPtr<FUICommandInfo> SnapAnchor;
+};
 
 FPositionalGenericJointVisualizer::FPositionalGenericJointVisualizer()
 	: FComponentVisualizer()
 {
+	m_Actions = MakeShareable(new FUICommandList);
 	m_Selection = NewObject<UAnchorSelectionState>(GetTransientPackage(), TEXT("PositionalAnchorSelectionState"), RF_Transactional);
+	FPositionalGenericJointVisualizerCommands::Register();
 }
 
 FPositionalGenericJointVisualizer::~FPositionalGenericJointVisualizer()
 {
+	FPositionalGenericJointVisualizerCommands::Unregister();
 }
 
 #pragma region FGCObject
@@ -30,6 +65,16 @@ void FPositionalGenericJointVisualizer::AddReferencedObjects(FReferenceCollector
 #pragma endregion // FGCObject
 
 #pragma region FComponentVisualizer
+void FPositionalGenericJointVisualizer::OnRegister()
+{
+	const auto &Commands = FPositionalGenericJointVisualizerCommands::Get();
+
+	m_Actions->MapAction(
+		Commands.SnapAnchor,
+		FExecuteAction::CreateSP(this, &FPositionalGenericJointVisualizer::OnSnapAnchor),
+		FCanExecuteAction::CreateSP(this, &FPositionalGenericJointVisualizer::CanSnapAnchor));
+}
+
 void FPositionalGenericJointVisualizer::DrawAnchor(FPrimitiveDrawInterface* PDI, const FTransform& transform, const FVector& anchorPos, const FQuat& anchorRot, const FLinearColor &color)
 {
 	auto pos = transform.TransformPosition(anchorPos);
@@ -48,21 +93,11 @@ void FPositionalGenericJointVisualizer::DrawVisualization(const UActorComponent*
 {
 	if (const auto* joint = Cast<UPositionalGenericJoint>(Component))
 	{
-		auto transformA = joint->GetOwner()->GetActorTransform();
-		transformA.RemoveScaling();
-
 		PDI->SetHitProxy(new HAnchorProxy(Component, 1));
-		DrawAnchor(PDI, transformA, joint->AnchorPositionA, joint->AnchorRotationA.Quaternion(), m_Selection->GetAnchor() == 1 ? FLinearColor::Yellow : FLinearColor(1.F, 0.F, 1.F));
+		DrawAnchor(PDI, GetBodyTransform(joint, 1), joint->AnchorPositionA, joint->AnchorRotationA.Quaternion(), m_Selection->GetAnchor() == 1 ? FLinearColor::Yellow : FLinearColor(1.F, 0.F, 1.F));
 
-		FTransform transformB = FTransform::Identity;
-		if (joint->ConnectedBody.IsValid())
-		{
-			transformB = joint->ConnectedBody.Get()->GetActorTransform();
-			transformB.RemoveScaling();
-		}
-		
 		PDI->SetHitProxy(new HAnchorProxy(Component, 2));
-		DrawAnchor(PDI, transformB, joint->AnchorPositionB, joint->AnchorRotationB.Quaternion(), m_Selection->GetAnchor() == 2 ? FLinearColor::Yellow : FLinearColor(0.5F, 0.F, 0.5F));
+		DrawAnchor(PDI, GetBodyTransform(joint, 2), joint->AnchorPositionB, joint->AnchorRotationB.Quaternion(), m_Selection->GetAnchor() == 2 ? FLinearColor::Yellow : FLinearColor(0.5F, 0.F, 0.5F));
 		PDI->SetHitProxy(nullptr);
 	}
 }
@@ -108,21 +143,17 @@ bool FPositionalGenericJointVisualizer::GetWidgetLocation(const FEditorViewportC
 		FVector loc = FVector::ZeroVector;
 		if (m_Selection->GetAnchor() == 1)
 		{
-			transform = joint->GetOwner()->GetActorTransform();
+			transform = GetBodyTransform(joint, 1);
 			loc = joint->AnchorPositionA;
 			
 		}
 		else if (m_Selection->GetAnchor() == 2)
 		{
+			transform = GetBodyTransform(joint, 2);
 			loc = joint->AnchorPositionB;
-			if (joint->ConnectedBody.IsValid())
-			{
-				transform = joint->ConnectedBody.Get()->GetActorTransform();
-			}
 		}
 
-
-		OutLocation = transform.TransformPositionNoScale(loc);
+		OutLocation = transform.TransformPosition(loc);
 		return true;
 	}
 	return false;
@@ -135,14 +166,14 @@ bool FPositionalGenericJointVisualizer::GetCustomInputCoordinateSystem(const FEd
 		const auto *joint = Cast<UPositionalGenericJoint>(m_Selection->GetPath().GetComponent());
 		if (m_Selection->GetAnchor() == 1)
 		{
-			auto rot = joint->GetOwner()->GetActorTransform().TransformRotation(joint->AnchorRotationA.Quaternion());
+			auto rot = GetBodyTransform(joint, 1).TransformRotation(joint->AnchorRotationA.Quaternion());
 			OutMatrix = FRotationMatrix::Make(rot);
 			return true;
 		}
 
 		if (m_Selection->GetAnchor() == 2)
 		{
-			auto rot = joint->ConnectedBody->GetActorTransform().TransformRotation(joint->AnchorRotationB.Quaternion());
+			auto rot = GetBodyTransform(joint, 2).TransformRotation(joint->AnchorRotationB.Quaternion());
 			OutMatrix = FRotationMatrix::Make(rot);
 			return true;
 		}
@@ -161,92 +192,47 @@ bool FPositionalGenericJointVisualizer::HandleInputDelta(
 	if (m_Selection->IsValid())
 	{
 		auto *joint = Cast<UPositionalGenericJoint>(m_Selection->GetPath().GetComponent());
+		uint8 anchor = m_Selection->GetAnchor();
 
-		if (m_Selection->GetAnchor() == 1)
+		if (!DeltaTranslate.IsZero())
 		{
-			if (!DeltaTranslate.IsZero())
+			auto posProp = GetAnchorPositionProperty(joint, anchor);
+			if (posProp)
 			{
-				auto posProp = FindFProperty<FStructProperty>(joint->GetClass(), FName("AnchorPositionA"));
-				if (posProp)
-				{
-					joint->Modify();
-					m_Selection->Modify();
+				joint->Modify();
+				m_Selection->Modify();
 
-					auto translate = joint->GetOwner()->GetActorTransform().InverseTransformVectorNoScale(DeltaTranslate);
+				auto translate = GetBodyTransform(joint, anchor).InverseTransformVectorNoScale(DeltaTranslate);
 
-					FVector *valuePtr = posProp->ContainerPtrToValuePtr<FVector>(joint);
-					FVector newValue = joint->AnchorPositionA + translate;
-					posProp->CopyCompleteValue(valuePtr, &newValue);
-					NotifyPropertyModified(joint, posProp, EPropertyChangeType::Interactive);
+				FVector *valuePtr = posProp->ContainerPtrToValuePtr<FVector>(joint);
+				FVector newValue = GetAnchorPosition(joint, anchor) + translate;
+				posProp->CopyCompleteValue(valuePtr, &newValue);
+				NotifyPropertyModified(joint, posProp, EPropertyChangeType::Interactive);
 
-					return true;
-				}
-			}
-
-			if (!DeltaRotate.IsZero())
-			{
-				auto rotProp = FindFProperty<FStructProperty>(joint->GetClass(), FName("AnchorRotationA"));
-				if (rotProp)
-				{
-					joint->Modify();
-					m_Selection->Modify();
-
-					auto bodyRot = joint->GetOwner()->GetActorTransform().GetRotation();
-					auto worldRot = bodyRot * joint->AnchorRotationA.Quaternion();
-					FRotator newValue(bodyRot.Inverse() * (DeltaRotate.Quaternion() * worldRot));
-
-					FRotator *valuePtr = rotProp->ContainerPtrToValuePtr<FRotator>(joint);
-					rotProp->CopyCompleteValue(valuePtr, &newValue);
-					NotifyPropertyModified(joint, rotProp, EPropertyChangeType::Interactive);
-
-					return true;
-				}
+				return true;
 			}
 		}
-		else if (m_Selection->GetAnchor() == 2)
+
+		if (!DeltaRotate.IsZero())
 		{
-			if (!DeltaTranslate.IsZero())
+			auto rotProp = GetAnchorRotationProperty(joint, anchor);
+			if (rotProp)
 			{
-				auto posProp = FindFProperty<FStructProperty>(joint->GetClass(), FName("AnchorPositionB"));
-				if (posProp)
-				{
-					joint->Modify();
-					m_Selection->Modify();
+				joint->Modify();
+				m_Selection->Modify();
 
-					auto translate = DeltaTranslate;
-					if (joint->ConnectedBody.IsValid())
-					 	translate = joint->ConnectedBody.Get()->GetActorTransform().InverseTransformVectorNoScale(DeltaTranslate);
+				auto bodyRot = GetBodyTransform(joint, anchor).GetRotation();
+				auto worldRot = bodyRot * GetAnchorRotation(joint, anchor);
+				FRotator newValue(bodyRot.Inverse() * (DeltaRotate.Quaternion() * worldRot));
 
-					FVector *valuePtr = posProp->ContainerPtrToValuePtr<FVector>(joint);
-					FVector newValue = joint->AnchorPositionB + translate;
-					posProp->CopyCompleteValue(valuePtr, &newValue);
-					NotifyPropertyModified(joint, posProp, EPropertyChangeType::Interactive);
+				FRotator *valuePtr = rotProp->ContainerPtrToValuePtr<FRotator>(joint);
+				rotProp->CopyCompleteValue(valuePtr, &newValue);
+				NotifyPropertyModified(joint, rotProp, EPropertyChangeType::Interactive);
 
-
-					return true;
-				}
-			}
-
-			if (!DeltaRotate.IsZero())
-			{
-				auto rotProp = FindFProperty<FStructProperty>(joint->GetClass(), FName("AnchorRotationB"));
-				if (rotProp)
-				{
-					joint->Modify();
-					m_Selection->Modify();
-
-					auto bodyRot = joint->ConnectedBody.IsValid() ? joint->ConnectedBody.Get()->GetActorTransform().GetRotation() : FQuat::Identity;
-					auto worldRot = bodyRot * joint->AnchorRotationB.Quaternion();
-					FRotator newValue(bodyRot.Inverse() * (DeltaRotate.Quaternion() * worldRot));
-
-					FRotator *valuePtr = rotProp->ContainerPtrToValuePtr<FRotator>(joint);
-					rotProp->CopyCompleteValue(valuePtr, &newValue);
-					NotifyPropertyModified(joint, rotProp, EPropertyChangeType::Interactive);
-
-					return true;
-				}
+				return true;
 			}
 		}
+		
 	}
 
 	return false;
@@ -259,4 +245,141 @@ void FPositionalGenericJointVisualizer::EndEditing()
 	m_Selection->Reset();
 }
 
+TSharedPtr<SWidget> FPositionalGenericJointVisualizer::GenerateContextMenu() const
+{
+	FMenuBuilder builder(true, m_Actions);
+	builder.BeginSection("GenericJointEdit", INVTEXT("Generic Joint Anchor"));
+	builder.AddMenuEntry(FPositionalGenericJointVisualizerCommands::Get().SnapAnchor);
+	builder.EndSection();
+	TSharedPtr<SWidget> widget = builder.MakeWidget();
+	return widget;
+}
+
+bool FPositionalGenericJointVisualizer::HandleInputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event)
+{
+	if (m_Selection->IsValid() && Event == IE_Pressed)
+	{
+		return m_Actions->ProcessCommandBindings(Key, FSlateApplication::Get().GetModifierKeys(), false);
+	}
+	return false;
+}
 #pragma endregion // FComponentVisualizer
+
+FTransform FPositionalGenericJointVisualizer::GetBodyTransform(const UPositionalGenericJoint *joint, const uint8 &anchor) const
+{
+	if (joint)
+	{
+		if (anchor == 1)
+		{
+			auto transform = joint->GetOwner()->GetActorTransform();
+			transform.RemoveScaling();
+			return transform;
+		}
+
+		if (anchor == 2 && joint->ConnectedBody.IsValid())
+		{
+			auto transform = joint->ConnectedBody.Get()->GetActorTransform();
+			transform.RemoveScaling();
+			return transform;
+		}
+	}
+	return FTransform::Identity;
+}
+
+FVector FPositionalGenericJointVisualizer::GetAnchorPosition(const UPositionalGenericJoint *joint, const uint8 &anchor) const
+{
+	if (joint)
+	{
+		switch (anchor)
+		{
+		case 1:
+			return joint->AnchorPositionA;
+		case 2:
+			return joint->AnchorPositionB;
+		}
+	}
+	return FVector::ZeroVector;
+}
+
+FQuat FPositionalGenericJointVisualizer::GetAnchorRotation(const UPositionalGenericJoint *joint, const uint8 &anchor) const
+{
+	if (joint)
+	{
+		switch (anchor)
+		{
+		case 1:
+			return joint->AnchorRotationA.Quaternion();
+		case 2:
+			return joint->AnchorRotationB.Quaternion();
+		}
+	}
+	return FQuat::Identity;
+}
+
+FStructProperty *FPositionalGenericJointVisualizer::GetAnchorPositionProperty(const UPositionalGenericJoint *joint, const uint8 &anchor) const
+{
+	if (joint)
+	{
+		switch (anchor)
+		{
+		case 1:
+			return FindFProperty<FStructProperty>(joint->GetClass(), FName("AnchorPositionA"));
+		case 2:
+			return FindFProperty<FStructProperty>(joint->GetClass(), FName("AnchorPositionB"));
+		}
+	}
+	return nullptr;
+}
+
+FStructProperty * FPositionalGenericJointVisualizer::GetAnchorRotationProperty(const UPositionalGenericJoint *joint, const uint8 &anchor) const
+{
+	if (joint)
+	{
+		switch (anchor)
+		{
+		case 1:
+			return FindFProperty<FStructProperty>(joint->GetClass(), FName("AnchorRotationA"));
+		case 2:
+			return FindFProperty<FStructProperty>(joint->GetClass(), FName("AnchorRotationB"));
+		}
+	}
+	return nullptr;
+}
+
+void FPositionalGenericJointVisualizer::OnSnapAnchor()
+{
+	if (m_Selection->IsValid())
+	{
+		auto *joint = Cast<UPositionalGenericJoint>(m_Selection->GetPath().GetComponent());
+		uint8 anchor = m_Selection->GetAnchor();
+
+		const uint8 other = 1 + (2 - anchor);
+
+		FTransform otherTransform = GetBodyTransform(joint, other);
+		FVector otherPos = otherTransform.TransformPosition(GetAnchorPosition(joint, other));
+		FQuat otherRot = otherTransform.GetRotation() * GetAnchorRotation(joint, other);
+
+		FTransform transform = GetBodyTransform(joint, anchor);
+		FVector newPos = transform.InverseTransformPosition(otherPos);
+		FRotator newRot = FRotator(transform.GetRotation().Inverse() * otherRot);
+
+		const FScopedTransaction transaction(INVTEXT("Snap Joint Anchor"));
+		joint->Modify();
+		m_Selection->Modify();
+
+		auto posProp = GetAnchorPositionProperty(joint, anchor);
+		FVector *posPtr = posProp->ContainerPtrToValuePtr<FVector>(joint);
+		posProp->CopyCompleteValue(posPtr, &newPos);
+		NotifyPropertyModified(joint, posProp, EPropertyChangeType::Interactive);
+
+		auto rotProp = GetAnchorRotationProperty(joint, anchor);
+		FRotator *rotPtr = rotProp->ContainerPtrToValuePtr<FRotator>(joint);
+		rotProp->CopyCompleteValue(rotPtr, &newRot);
+		NotifyPropertyModified(joint, rotProp, EPropertyChangeType::Interactive);
+	}
+}
+
+bool FPositionalGenericJointVisualizer::CanSnapAnchor() const
+{
+	return m_Selection->IsValid();
+}

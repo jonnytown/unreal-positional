@@ -6,9 +6,9 @@ public class unreal_positional_editor : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "unreal_positional" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Slate", "SlateCore", "unreal_positional" });
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "UnrealEd" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "UnrealEd", "EditorStyle" });
 
 		PublicIncludePaths.AddRange(new string[] { @"unreal_positional_editor\Public", @"unreal_positional\positional\src" });
 		PrivateIncludePaths.Add(@"unreal_positional_editor\Private");
