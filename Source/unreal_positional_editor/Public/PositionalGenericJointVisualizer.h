@@ -5,12 +5,51 @@
 #include "unreal_positional_editor.h"
 #include "ComponentVisualizer.h"
 #include "PositionalGenericJoint.h"
-#include "Math/Quat.h"
+#include "PositionalGenericJointVisualizer.generated.h"
 
 /**
  * 
  */
-class FPositionalGenericJointVisualizer : public FComponentVisualizer
+UCLASS(Transient)
+class UNREAL_POSITIONAL_EDITOR_API UAnchorSelectionState : public UObject
+{
+	GENERATED_BODY()
+
+public:
+    void Reset()
+    {
+        Anchor = 0;
+        Path.Reset();
+    }
+
+    bool IsValid() const
+    {
+        return Path.IsValid() && (Anchor == 1 || Anchor == 2);
+    }
+
+    uint8 GetAnchor() const { return Anchor; }
+    void SetAnchor(uint8 anchor)
+    {
+        Anchor = anchor;
+    }
+
+    FComponentPropertyPath GetPath() const { return Path; }
+    void SetPath(const FComponentPropertyPath &path)
+    {
+        Path = path;
+    }
+protected:
+    UPROPERTY()
+    uint8 Anchor;
+
+    UPROPERTY()
+    FComponentPropertyPath Path;
+};
+
+/**
+ * 
+ */
+class UNREAL_POSITIONAL_EDITOR_API FPositionalGenericJointVisualizer : public FComponentVisualizer, public FGCObject
 {
 public:
 	FPositionalGenericJointVisualizer();
@@ -26,11 +65,14 @@ public:
     virtual void EndEditing() override;
     // End FComponentVisualizer interface
 
+    // Begin FComponentVisualizer interface
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+    // End FComponentVisualizer interface
+
 private:
     void DrawAnchor(FPrimitiveDrawInterface *PDI, const FTransform &transform, const FVector &anchorPos, const FQuat &anchorRot, const FLinearColor &color);
 
-    TWeakObjectPtr<UPositionalGenericJoint> m_EditedComponent;
-    uint8 m_SelectedAnchor;
+    UAnchorSelectionState *m_Selection;
 };
 
 struct HAnchorProxy : public HComponentVisProxy

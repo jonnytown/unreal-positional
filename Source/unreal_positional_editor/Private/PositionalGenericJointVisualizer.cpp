@@ -10,12 +10,24 @@
 IMPLEMENT_HIT_PROXY(HAnchorProxy, HComponentVisProxy);
 
 FPositionalGenericJointVisualizer::FPositionalGenericJointVisualizer()
+	: FComponentVisualizer()
 {
+	m_Selection = NewObject<UAnchorSelectionState>(GetTransientPackage(), TEXT("PositionalAnchorSelectionState"), RF_Transactional);
 }
 
 FPositionalGenericJointVisualizer::~FPositionalGenericJointVisualizer()
 {
 }
+
+#pragma region FGCObject
+void FPositionalGenericJointVisualizer::AddReferencedObjects(FReferenceCollector& Collector)
+{
+	if (m_Selection)
+	{
+		Collector.AddReferencedObject(m_Selection);
+	}
+}
+#pragma endregion // FGCObject
 
 #pragma region FComponentVisualizer
 void FPositionalGenericJointVisualizer::DrawAnchor(FPrimitiveDrawInterface* PDI, const FTransform& transform, const FVector& anchorPos, const FQuat& anchorRot, const FLinearColor &color)
@@ -40,7 +52,7 @@ void FPositionalGenericJointVisualizer::DrawVisualization(const UActorComponent*
 		transformA.RemoveScaling();
 
 		PDI->SetHitProxy(new HAnchorProxy(Component, 1));
-		DrawAnchor(PDI, transformA, joint->AnchorPositionA, joint->AnchorRotationA.Quaternion(), m_SelectedAnchor == 1 ? FLinearColor::Yellow : FLinearColor(1.F, 0.F, 1.F));
+		DrawAnchor(PDI, transformA, joint->AnchorPositionA, joint->AnchorRotationA.Quaternion(), m_Selection->GetAnchor() == 1 ? FLinearColor::Yellow : FLinearColor(1.F, 0.F, 1.F));
 
 		FTransform transformB = FTransform::Identity;
 		if (joint->ConnectedBody.IsValid())
@@ -50,58 +62,57 @@ void FPositionalGenericJointVisualizer::DrawVisualization(const UActorComponent*
 		}
 		
 		PDI->SetHitProxy(new HAnchorProxy(Component, 2));
-		DrawAnchor(PDI, transformB, joint->AnchorPositionB, joint->AnchorRotationB.Quaternion(), m_SelectedAnchor == 2 ? FLinearColor::Yellow : FLinearColor(0.5F, 0.F, 0.5F));
+		DrawAnchor(PDI, transformB, joint->AnchorPositionB, joint->AnchorRotationB.Quaternion(), m_Selection->GetAnchor() == 2 ? FLinearColor::Yellow : FLinearColor(0.5F, 0.F, 0.5F));
 		PDI->SetHitProxy(nullptr);
 	}
 }
 
 bool FPositionalGenericJointVisualizer::VisProxyHandleClick(FEditorViewportClient* InViewportClient, HComponentVisProxy* VisProxy, const FViewportClick& Click)
 {
-	bool bEditing = false;
-
 	if (VisProxy && VisProxy->Component.IsValid())
 	{
-		bEditing = true;
+		check(m_Selection);
+		m_Selection->Modify();
+		m_Selection->SetPath(FComponentPropertyPath(VisProxy->Component.Get()));
 
 		if (VisProxy->IsA(HAnchorProxy::StaticGetType()))
 		{
-			HAnchorProxy* Proxy = static_cast<HAnchorProxy*>(VisProxy);
-
-			m_SelectedAnchor = Proxy->Anchor;
 			auto joint = Cast<UPositionalGenericJoint>(VisProxy->Component.Get());
-			m_EditedComponent = const_cast<UPositionalGenericJoint *>(joint);
-
+			if (joint)
+			{
+				const FScopedTransaction transaction(INVTEXT("Select Joint Anchor"));
+				check(m_Selection);
+				m_Selection->Modify();
+				m_Selection->SetAnchor(static_cast<HAnchorProxy *>(VisProxy)->Anchor);
+				return true;
+			}
 		}
 	}
-	else
-	{
-		m_SelectedAnchor = 0;
-		m_EditedComponent.Reset();
-	}
 
-	return bEditing;
+	m_Selection->Reset();
+	return false;
 }
 
 UActorComponent* FPositionalGenericJointVisualizer::GetEditedComponent() const
 {
-	return m_EditedComponent.IsValid() ? m_EditedComponent.Get() : nullptr;
+	return m_Selection->GetPath().GetComponent();
 }
 
 bool FPositionalGenericJointVisualizer::GetWidgetLocation(const FEditorViewportClient* ViewportClient, FVector& OutLocation) const
 {
-	if (m_EditedComponent.IsValid() && m_SelectedAnchor > 0)
+	if (m_Selection->IsValid())
 	{
-		const auto *joint = m_EditedComponent.Get();
+		const auto *joint = Cast<UPositionalGenericJoint>(m_Selection->GetPath().GetComponent());
 
 		FTransform transform = FTransform::Identity;
 		FVector loc = FVector::ZeroVector;
-		if (m_SelectedAnchor == 1)
+		if (m_Selection->GetAnchor() == 1)
 		{
 			transform = joint->GetOwner()->GetActorTransform();
 			loc = joint->AnchorPositionA;
 			
 		}
-		else if (m_SelectedAnchor == 2)
+		else if (m_Selection->GetAnchor() == 2)
 		{
 			loc = joint->AnchorPositionB;
 			if (joint->ConnectedBody.IsValid())
@@ -119,18 +130,19 @@ bool FPositionalGenericJointVisualizer::GetWidgetLocation(const FEditorViewportC
 
 bool FPositionalGenericJointVisualizer::GetCustomInputCoordinateSystem(const FEditorViewportClient *ViewportClient, FMatrix &OutMatrix) const
 {
-	if (m_SelectedAnchor > 0 && m_EditedComponent.IsValid() && ViewportClient->GetWidgetCoordSystemSpace() == COORD_Local)
+	if (m_Selection->IsValid() && ViewportClient->GetWidgetCoordSystemSpace() == COORD_Local)
 	{
-		if (m_SelectedAnchor == 1)
+		const auto *joint = Cast<UPositionalGenericJoint>(m_Selection->GetPath().GetComponent());
+		if (m_Selection->GetAnchor() == 1)
 		{
-			auto rot = m_EditedComponent.Get()->GetOwner()->GetActorTransform().TransformRotation(m_EditedComponent.Get()->AnchorRotationA.Quaternion());
+			auto rot = joint->GetOwner()->GetActorTransform().TransformRotation(joint->AnchorRotationA.Quaternion());
 			OutMatrix = FRotationMatrix::Make(rot);
 			return true;
 		}
 
-		if (m_SelectedAnchor == 2)
+		if (m_Selection->GetAnchor() == 2)
 		{
-			auto rot = m_EditedComponent.Get()->ConnectedBody->GetActorTransform().TransformRotation(m_EditedComponent.Get()->AnchorRotationB.Quaternion());
+			auto rot = joint->ConnectedBody->GetActorTransform().TransformRotation(joint->AnchorRotationB.Quaternion());
 			OutMatrix = FRotationMatrix::Make(rot);
 			return true;
 		}
@@ -146,11 +158,11 @@ bool FPositionalGenericJointVisualizer::HandleInputDelta(
 	FRotator &DeltaRotate,
 	FVector &DeltaScale)
 {
-	if (m_EditedComponent.IsValid() && m_SelectedAnchor > 0)
+	if (m_Selection->IsValid())
 	{
-		const auto joint = m_EditedComponent.Get();
+		auto *joint = Cast<UPositionalGenericJoint>(m_Selection->GetPath().GetComponent());
 
-		if (m_SelectedAnchor == 1)
+		if (m_Selection->GetAnchor() == 1)
 		{
 			if (!DeltaTranslate.IsZero())
 			{
@@ -158,6 +170,7 @@ bool FPositionalGenericJointVisualizer::HandleInputDelta(
 				if (posProp)
 				{
 					joint->Modify();
+					m_Selection->Modify();
 
 					auto translate = joint->GetOwner()->GetActorTransform().InverseTransformVectorNoScale(DeltaTranslate);
 
@@ -176,6 +189,7 @@ bool FPositionalGenericJointVisualizer::HandleInputDelta(
 				if (rotProp)
 				{
 					joint->Modify();
+					m_Selection->Modify();
 
 					auto bodyRot = joint->GetOwner()->GetActorTransform().GetRotation();
 					auto worldRot = bodyRot * joint->AnchorRotationA.Quaternion();
@@ -189,7 +203,7 @@ bool FPositionalGenericJointVisualizer::HandleInputDelta(
 				}
 			}
 		}
-		else if (m_SelectedAnchor == 2)
+		else if (m_Selection->GetAnchor() == 2)
 		{
 			if (!DeltaTranslate.IsZero())
 			{
@@ -197,13 +211,14 @@ bool FPositionalGenericJointVisualizer::HandleInputDelta(
 				if (posProp)
 				{
 					joint->Modify();
+					m_Selection->Modify();
 
 					auto translate = DeltaTranslate;
 					if (joint->ConnectedBody.IsValid())
 					 	translate = joint->ConnectedBody.Get()->GetActorTransform().InverseTransformVectorNoScale(DeltaTranslate);
 
-					FVector *valuePtr = posProp->ContainerPtrToValuePtr<FVector>(m_EditedComponent.Get());
-					FVector newValue = m_EditedComponent.Get()->AnchorPositionB + translate;
+					FVector *valuePtr = posProp->ContainerPtrToValuePtr<FVector>(joint);
+					FVector newValue = joint->AnchorPositionB + translate;
 					posProp->CopyCompleteValue(valuePtr, &newValue);
 					NotifyPropertyModified(joint, posProp, EPropertyChangeType::Interactive);
 
@@ -218,6 +233,7 @@ bool FPositionalGenericJointVisualizer::HandleInputDelta(
 				if (rotProp)
 				{
 					joint->Modify();
+					m_Selection->Modify();
 
 					auto bodyRot = joint->ConnectedBody.IsValid() ? joint->ConnectedBody.Get()->GetActorTransform().GetRotation() : FQuat::Identity;
 					auto worldRot = bodyRot * joint->AnchorRotationB.Quaternion();
@@ -238,8 +254,9 @@ bool FPositionalGenericJointVisualizer::HandleInputDelta(
 
 void FPositionalGenericJointVisualizer::EndEditing()
 {
-	m_EditedComponent.Reset();
-	m_SelectedAnchor = 0;
+	check(m_Selection);
+	m_Selection->Modify();
+	m_Selection->Reset();
 }
 
 #pragma endregion // FComponentVisualizer
