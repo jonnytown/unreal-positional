@@ -73,5 +73,7 @@ protected:
 	virtual Ref<Constraint> CreateConstraint(APositionalWorld *world, APositionalRigidBody *bodyA, APositionalRigidBody *bodyB) override;
 
 public:
-
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent) override;
+#endif //WITH_EDITOR
 };

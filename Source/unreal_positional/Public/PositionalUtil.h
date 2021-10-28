@@ -2,6 +2,7 @@
 #include "math/Math.h"
 #include "Math/Vector.h"
 #include "Math/Quat.h"
+#include "Math/UnrealMathUtility.h"
 #include "DrawDebugHelpers.h"
 
 class UWorld;
@@ -25,6 +26,11 @@ namespace Positional
 		return Quat(q.X, q.Y, q.Z, q.W);
 	}
 
+	inline Quat ToQuat(const FRotator &r)
+	{
+		auto q = r.Quaternion();
+		return Quat(q.X, q.Y, q.Z, q.W);
+	}
 
 	inline FQuat ToFQuaternion(const Quat& q)
 	{

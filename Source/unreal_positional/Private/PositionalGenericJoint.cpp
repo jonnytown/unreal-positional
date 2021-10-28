@@ -4,7 +4,6 @@
 #include "PositionalGenericJoint.h"
 #include "constraints/GenericJointConstraint.h"
 #include "PositionalUtil.h"
-
 // Sets default values for this component's properties
 UPositionalGenericJoint::UPositionalGenericJoint()
 {
@@ -30,9 +29,84 @@ Ref<Constraint> UPositionalGenericJoint::CreateConstraint(APositionalWorld *worl
 		LinearLimit,
 		RotationCompliance,
 		RotationDamping,
-		MinTwist,
-		MaxTwist,
-		MinSwing,
-		MaxSwing);
+		FMath::DegreesToRadians(MinTwist),
+		FMath::DegreesToRadians(MaxTwist),
+		FMath::DegreesToRadians(MinSwing),
+		FMath::DegreesToRadians(MaxSwing));
 	return constraint;
 }
+
+#if WITH_EDITOR
+void UPositionalGenericJoint::PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	FString name;
+	PropertyChangedEvent.MemberProperty->GetName(name);
+	if (m_Constraint.valid())
+	{
+		auto data = m_Constraint.get().getData<GenericJointConstraint::Data>();
+
+		if (name == TEXT("AnchorPositionA"))
+		{
+			data->poseA.position = ToVec3(AnchorPositionA);
+		}
+		else if (name == TEXT("AnchorRotationA"))
+		{
+			data->poseA.rotation = ToQuat(AnchorRotationA);
+		}
+		else if (name == TEXT("AnchorPositionB"))
+		{
+			data->poseA.position = ToVec3(AnchorPositionB);
+		}
+		else if (name == TEXT("AnchorRotationB"))
+		{
+			data->poseA.rotation = ToQuat(AnchorRotationB);
+		}
+		else if (name == TEXT("DOF"))
+		{
+			data->dof = DOF;
+		}
+		else if (name == TEXT("HasLimits"))
+		{
+			data->hasLimits = HasLimits;
+		}
+		else if (name == TEXT("PositionCompliance"))
+		{
+			data->positionCompliance = PositionCompliance;
+		}
+		else if (name == TEXT("PositionDamping"))
+		{
+			data->positionDamping = PositionDamping;
+		}
+		else if (name == TEXT("LinearLimit"))
+		{
+			data->linearLimit = LinearLimit;
+		}
+		else if (name == TEXT("RotationCompliance"))
+		{
+			data->rotationCompliance = RotationCompliance;
+		}
+		else if (name == TEXT("RotationDamping"))
+		{
+			data->rotationDamping = RotationDamping;
+		}
+		else if (name == TEXT("MinTwist"))
+		{
+			data->minTwist = FMath::DegreesToRadians(MinTwist);
+		}
+		else if (name == TEXT("MaxTwist"))
+		{
+			data->maxTwist = FMath::DegreesToRadians(MaxTwist);
+		}
+		else if (name == TEXT("MinSwing"))
+		{
+			data->minSwing = FMath::DegreesToRadians(MinSwing);
+		}
+		else if (name == TEXT("MaxSwing"))
+		{
+			data->maxSwing = FMath::DegreesToRadians(MaxSwing);
+		}
+	}
+}
+#endif //WITH_EDITOR

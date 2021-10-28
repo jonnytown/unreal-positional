@@ -73,10 +73,10 @@ void UPositionalConstraint::PostEditChangeProperty(FPropertyChangedEvent &Proper
 		return;
 	}
 
-	/*if (m_Collider.valid() && name == TEXT("Density") && m_Collider.get().body().valid())
+	if (m_Constraint.valid() && name == TEXT("ConnectedBody"))
 	{
-		m_Collider.get().density = Density;
+		m_Constraint.get().bodyB = ConnectedBody.IsValid() ? ConnectedBody.Get()->GetRef() : Body::null;
 		return;
-	}*/
+	}
 }
 #endif // WITH_EDITOR
