@@ -12,6 +12,7 @@ UCLASS()
 class UNREAL_POSITIONAL_API APositionalRigidBody : public AActor
 {
 	friend class APositionalWorld;
+	friend class UPositionalCollider;
 	friend class UPositionalConstraint;
 
 	GENERATED_BODY()

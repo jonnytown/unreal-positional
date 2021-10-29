@@ -8,6 +8,7 @@
 #include "PositionalRigidBody.h"
 #include "PositionalConstraint.h"
 #include "collision/narrowphase/Penetration.h"
+#include "TimerManager.h"
 
 // Sets default values
 APositionalWorld::APositionalWorld()
@@ -46,7 +47,6 @@ void APositionalWorld::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	m_Simulating = false;
 	GetWorldTimerManager().ClearTimer(m_SimulationTimer);
 }
-
 
 void APositionalWorld::FireSimulation()
 {
@@ -231,55 +231,32 @@ void APositionalWorld::Raycast(const FVector& rayOrigin, const FVector& rayNorma
 	}
 }
 
-
-Ref<Body> APositionalWorld::CreateRigidBody(APositionalRigidBody* actor, const FVector& pos, const FQuat& rot)
+void APositionalWorld::RegisterBody(APositionalRigidBody *body)
 {
-	auto ref = m_World->createBody<RigidBody>(ToVec3(pos), ToQuat(rot));
-	m_RigidBodies.Add(ref.id(), actor);
-	return ref;
+	m_RigidBodies.Add(body->GetRef().id(), body);
 }
 
-void APositionalWorld::DestroyRigidBody(const Ref<Body>& ref)
+void APositionalWorld::DeregisterBody(APositionalRigidBody *body)
 {
-	m_RigidBodies.Remove(ref.id());
-	m_World->destroyBody(ref);
+	m_RigidBodies.Remove(body->GetRef().id());
 }
 
-Ref<Collider> APositionalWorld::CreateSphereCollider(APositionalRigidBody* body, UPositionalCollider* component, const FVector& pos, const float& radius, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness)
+void APositionalWorld::RegisterCollider(UPositionalCollider *collider)
 {
-	auto ref = m_World->createSphereCollider(body ? body->GetRef() : Body::null, ToVec3(pos), radius, density, staticFriction, dynamicFriction, bounciness);
-	m_Colliders.Add(ref.id(), component);
-	return ref;
+	m_Colliders.Add(collider->GetRef().id(), collider);
 }
 
-Ref<Collider> APositionalWorld::CreateCapsuleCollider(APositionalRigidBody* body, UPositionalCollider* component, const FVector& pos, const FQuat& rot, const float& radius, const float& length, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness)
+void APositionalWorld::DeregisterCollider(UPositionalCollider *collider)
 {
-	auto ref = m_World->createCapsuleCollider(body ? body->GetRef() : Body::null, ToVec3(pos), ToQuat(rot), radius, length, density, staticFriction, dynamicFriction, bounciness);
-	m_Colliders.Add(ref.id(), component);
-	return ref;
+	m_Colliders.Remove(collider->GetRef().id());
 }
 
-Ref<Collider> APositionalWorld::CreateBoxCollider(APositionalRigidBody* body, UPositionalCollider* component, const FVector& pos, const FQuat& rot, const FVector& extents, const float& density, const float& staticFriction, const float& dynamicFriction, const float& bounciness)
+void APositionalWorld::RegisterConstraint(UPositionalConstraint *constraint)
 {
-	auto ref = m_World->createBoxCollider(body ? body->GetRef() : Body::null, ToVec3(pos), ToQuat(rot), ToVec3(extents), density, staticFriction, dynamicFriction, bounciness);
-	m_Colliders.Add(ref.id(), component);
-	return ref;
+	m_Constraints.Add(constraint->GetRef().id(), constraint);
 }
 
-void APositionalWorld::DestroyCollider(const Ref<Collider> &ref)
+void APositionalWorld::DeregisterConstraint(UPositionalConstraint *constraint)
 {
-	m_Colliders.Remove(ref.id());
-	if (ref.valid())
-	{
-		m_World->destroyCollider(ref);
-	}
-}
-
-void APositionalWorld::DestroyConstraint(const Ref<Constraint> &ref)
-{
-	m_Constraints.Remove(ref.id());
-	if (ref.valid())
-	{
-		m_World->destroyConstraint(ref);
-	}
+	m_Constraints.Remove(constraint->GetRef().id());
 }

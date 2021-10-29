@@ -11,10 +11,10 @@ UPositionalSphereCollider::UPositionalSphereCollider()
 	Radius = 50.0f;
 }
 
-Ref<Collider> UPositionalSphereCollider::CreateCollider(APositionalWorld* world, APositionalRigidBody* body, const FTransform& transform)
+Ref<Collider> UPositionalSphereCollider::CreateCollider(Positional::World *world, const Ref<Body> &body, const FTransform &transform)
 {
 	const auto pos = transform.GetTranslation() + Center;
-	return world->CreateSphereCollider(body, this, pos, Radius, Density, StaticFriction, DynamicFriction, Bounciness);
+	return world->createSphereCollider(body, ToVec3(pos), Radius, Density, StaticFriction, DynamicFriction, Bounciness);
 }
 
 void UPositionalSphereCollider::SyncTransform(const FTransform& transform)

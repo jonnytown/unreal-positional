@@ -70,7 +70,7 @@ public:
 	UPositionalGenericJoint();
 
 protected:
-	virtual Ref<Constraint> CreateConstraint(APositionalWorld *world, APositionalRigidBody *bodyA, APositionalRigidBody *bodyB) override;
+	virtual Ref<Constraint> CreateConstraint(Positional::World *world, const Ref<Body> &bodyA, const Ref<Body> &bodyB) override;
 
 public:
 #if WITH_EDITOR

@@ -12,11 +12,11 @@ UPositionalBoxCollider::UPositionalBoxCollider()
 }
 
 
-Ref<Collider> UPositionalBoxCollider::CreateCollider(APositionalWorld* world, APositionalRigidBody* body, const FTransform& transform)
+Ref<Collider> UPositionalBoxCollider::CreateCollider(Positional::World* world, const Ref<Body> &body, const FTransform& transform)
 {
 	const auto pos = transform.GetTranslation() + Center;
 	const auto rot = FQuat(Rotation) * transform.GetRotation();
-	return world->CreateBoxCollider(body, this, pos, rot, Extents, Density, StaticFriction, DynamicFriction, Bounciness);
+	return world->createBoxCollider(body, ToVec3(pos), ToQuat(rot), ToVec3(Extents), Density, StaticFriction, DynamicFriction, Bounciness);
 }
 
 void UPositionalBoxCollider::SyncTransform(const FTransform& transform)

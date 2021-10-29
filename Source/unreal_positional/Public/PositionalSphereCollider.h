@@ -21,6 +21,6 @@ public:
 	// Sets default values for this component's properties
 	UPositionalSphereCollider();
 protected:
-	virtual Ref<Collider> CreateCollider(APositionalWorld* world, APositionalRigidBody* body, const FTransform& transform) override;
+	virtual Ref<Collider> CreateCollider(Positional::World *world, const Ref<Body> &body, const FTransform &transform) override;
 	virtual void SyncTransform(const FTransform &transform) override;
 };

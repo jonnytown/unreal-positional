@@ -44,7 +44,8 @@ void UPositionalCollider::CreateCollider(const TSoftObjectPtr<APositionalWorld> 
 	{
 		// TODO: find body in ancestor
 		auto body = Cast<APositionalRigidBody>(GetOwner());
-		m_Collider = CreateCollider(world.Get(), body, GetRelativeTransform());
+		m_Collider = CreateCollider(world.Get()->GetPtr(), body ? body->GetRef() : Body::null, GetRelativeTransform());
+		world.Get()->RegisterCollider(this);
 	}
 }
 
@@ -52,7 +53,8 @@ void UPositionalCollider::DestroyCollider(const TSoftObjectPtr<APositionalWorld>
 {
 	if (m_Collider.valid() && world.IsValid())
 	{
-		world.Get()->DestroyCollider(m_Collider);
+		world.Get()->DeregisterCollider(this);
+		world.Get()->GetPtr()->destroyCollider(m_Collider);
 		m_Collider.reset();
 	}
 }

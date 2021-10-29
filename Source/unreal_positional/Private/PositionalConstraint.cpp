@@ -28,7 +28,6 @@ void UPositionalConstraint::OnRegister()
 void UPositionalConstraint::OnUnregister()
 {
 	Super::OnUnregister();
-
 	DestroyConstraint(World);
 }
 
@@ -39,7 +38,8 @@ void UPositionalConstraint::CreateConstraint(const TSoftObjectPtr<APositionalWor
 		auto body = Cast<APositionalRigidBody>(GetOwner());
 		if (body)
 		{
-			m_Constraint = CreateConstraint(world.Get(), body, ConnectedBody.Get());
+			m_Constraint = CreateConstraint(world.Get()->GetPtr(), body->GetRef(), ConnectedBody.IsValid() ? ConnectedBody.Get()->GetRef() : Body::null);
+			world.Get()->RegisterConstraint(this);
 		}
 		else
 		{
@@ -52,7 +52,8 @@ void UPositionalConstraint::DestroyConstraint(const TSoftObjectPtr<APositionalWo
 {
 	if (m_Constraint.valid() && world.IsValid())
 	{
-		world.Get()->DestroyConstraint(m_Constraint);
+		world.Get()->DeregisterConstraint(this);
+		world.Get()->GetPtr()->destroyConstraint(m_Constraint);
 		m_Constraint.reset();
 	}
 }

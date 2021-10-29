@@ -8,10 +8,11 @@
 #include "PositionalRigidBody.h"
 #include "PositionalConstraint.generated.h"
 
-
 UCLASS( ClassGroup=(Custom), Abstract )
 class UNREAL_POSITIONAL_API UPositionalConstraint : public UActorComponent
 {
+	friend class APositionalWorld;
+
 	GENERATED_BODY()
 
 public:	
@@ -21,14 +22,19 @@ public:
 	UPROPERTY(EditAnywhere)
 		TSoftObjectPtr<APositionalRigidBody> ConnectedBody;
 
+	UPROPERTY(EditAnywhere)
+		bool IgnoreCollisions;
+
 	// Sets default values for this component's properties
 	UPositionalConstraint();
 
 protected:
 	Ref<Constraint> m_Constraint;
 	TSoftObjectPtr<APositionalWorld> m_PrevWorld;
+
+	Ref<Constraint> GetRef() { return m_Constraint; }
 	
-	virtual Ref<Constraint> CreateConstraint(APositionalWorld *world, APositionalRigidBody *bodyA, APositionalRigidBody *bodyB)
+	virtual Ref<Constraint> CreateConstraint(Positional::World *world, const Ref<Body> &bodyA, const Ref<Body> &bodyB)
 	{
 		UE_LOG(LogPositional, Fatal, TEXT("CreateConstraint not implemented!"));
 		return Ref<Constraint>();

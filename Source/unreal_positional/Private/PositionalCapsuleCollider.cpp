@@ -12,11 +12,11 @@ UPositionalCapsuleCollider::UPositionalCapsuleCollider()
 	Length = 100;
 }
 
-Ref<Collider> UPositionalCapsuleCollider::CreateCollider(APositionalWorld* world, APositionalRigidBody* body, const FTransform& transform)
+Ref<Collider> UPositionalCapsuleCollider::CreateCollider(Positional::World *world, const Ref<Body> &body, const FTransform &transform)
 {
 	const auto pos = transform.GetTranslation() + Center;
 	const auto rot = FQuat(Rotation) * transform.GetRotation();
-	return world->CreateCapsuleCollider(body, this, pos, rot, Radius, Length, Density, StaticFriction, DynamicFriction, Bounciness);
+	return world->createCapsuleCollider(body, ToVec3(pos), ToQuat(rot), Radius, Length, Density, StaticFriction, DynamicFriction, Bounciness);
 }
 
 void UPositionalCapsuleCollider::SyncTransform(const FTransform& transform)

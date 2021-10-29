@@ -14,12 +14,12 @@ UPositionalGenericJoint::UPositionalGenericJoint()
 	// ...
 }
 
-Ref<Constraint> UPositionalGenericJoint::CreateConstraint(APositionalWorld *world, APositionalRigidBody *bodyA, APositionalRigidBody *bodyB)
+Ref<Constraint> UPositionalGenericJoint::CreateConstraint(Positional::World *world, const Ref<Body> &bodyA, const Ref<Body> &bodyB)
 {
-	Ref<Constraint> constraint = world->CreateConstraint<GenericJointConstraint, GenericJointConstraint::Data>(
-		this,
+	return world->createConstraint<GenericJointConstraint, GenericJointConstraint::Data>(
 		bodyA,
 		bodyB,
+		IgnoreCollisions,
 		Pose(ToVec3(AnchorPositionA), ToQuat(AnchorRotationA.Quaternion())),
 		Pose(ToVec3(AnchorPositionB), ToQuat(AnchorRotationB.Quaternion())),
 		DOF,
@@ -33,7 +33,6 @@ Ref<Constraint> UPositionalGenericJoint::CreateConstraint(APositionalWorld *worl
 		FMath::DegreesToRadians(MaxTwist),
 		FMath::DegreesToRadians(MinSwing),
 		FMath::DegreesToRadians(MaxSwing));
-	return constraint;
 }
 
 #if WITH_EDITOR

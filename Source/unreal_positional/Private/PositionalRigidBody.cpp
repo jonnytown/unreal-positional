@@ -17,16 +17,17 @@ void APositionalRigidBody::CreateBody(TSoftObjectPtr<APositionalWorld>& world)
 	if (!m_Body.valid() && world.IsValid())
 	{
 		auto transform = GetActorTransform();
-		m_Body = world.Get()->CreateRigidBody(this, transform.GetTranslation(), transform.GetRotation());
+		m_Body = world.Get()->GetPtr()->createBody<RigidBody>(ToVec3(transform.GetTranslation()), ToQuat(transform.GetRotation()));
+		world.Get()->RegisterBody(this);
 	}
 }
-
 
 void APositionalRigidBody::DestroyBody(TSoftObjectPtr<APositionalWorld>&world)
 {
 	if (m_Body.valid() && world.IsValid())
 	{
-		world.Get()->DestroyRigidBody(m_Body);
+		world.Get()->DeregisterBody(this);
+		world.Get()->GetPtr()->destroyBody(m_Body);
 		m_Body.reset();
 	}
 }
