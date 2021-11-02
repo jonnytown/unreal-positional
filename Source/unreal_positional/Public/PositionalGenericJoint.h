@@ -15,55 +15,55 @@ enum class EDOF : uint8
 };
 ENUM_CLASS_FLAGS(EDOF);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Positional), meta=(BlueprintSpawnableComponent) )
 class UNREAL_POSITIONAL_API UPositionalGenericJoint : public UPositionalConstraint
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Constraint|Anchor A")
 	FVector AnchorPositionA;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint|Anchor A")
 	FRotator AnchorRotationA;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint|Anchor B")
 	FVector AnchorPositionB;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint|Anchor B")
 	FRotator AnchorRotationB;
 
-	UPROPERTY(EditAnywhere, meta=(Bitmask, BitmaskEnum = "EDOF"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(Bitmask, BitmaskEnum = "EDOF"), Category = "Constraint|Joint")
 	uint8 DOF;
 
-	UPROPERTY(EditAnywhere, meta=(Bitmask, BitmaskEnum = "EDOF"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Bitmask, BitmaskEnum = "EDOF"), Category = "Constraint|Joint")
 	uint8 HasLimits;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint|Joint")
 	double PositionCompliance;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint|Joint")
 	double PositionDamping;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint|Joint")
 	double LinearLimit;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint|Joint")
 	double RotationCompliance;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint|Joint")
 	double RotationDamping;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint|Joint")
 	double MinTwist;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint|Joint")
 	double MaxTwist;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint|Joint")
 	double MinSwing;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint|Joint")
 	double MaxSwing;
 
 	// Sets default values for this component's properties

@@ -14,8 +14,8 @@ UPositionalCollider::UPositionalCollider()
 
 	// ...
 	Density = 0.0012;
-	StaticFriction = 0.5;
-	DynamicFriction = 0.0;
+	StaticFriction = 0.2;
+	DynamicFriction = 0.2;
 	Bounciness = 0.2;
 }
 

@@ -4,9 +4,6 @@
 
 #include "unreal_positional_editor.h"
 #include "ComponentVisualizer.h"
-#include "PositionalBoxCollider.h"
-#include "PositionalSphereCollider.h"
-#include "PositionalCapsuleCollider.h"
 
 /**
  * 
@@ -27,4 +24,5 @@ private:
     static void DrawSphere(FPrimitiveDrawInterface *PDI, const FVector &pos, const FQuat &rot, const float &radius);
     static void DrawBox(FPrimitiveDrawInterface *PDI, const FVector &pos, const FQuat &rot, const FVector &extents);
     static void DrawCapsule(FPrimitiveDrawInterface *PDI, const FVector &pos, const FQuat &rot, const float &radius, const float &length);
+    static void DrawCylinder(FPrimitiveDrawInterface *PDI, const FVector &pos, const FQuat &rot, const float &radius, const float &length);
 };

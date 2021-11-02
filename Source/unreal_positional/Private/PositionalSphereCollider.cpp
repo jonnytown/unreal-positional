@@ -2,6 +2,7 @@
 
 
 #include "PositionalSphereCollider.h"
+#include "collision/collider/SphereCollider.h"
 #include "PositionalUtil.h"
 
 // Sets default values for this component's properties
@@ -14,7 +15,7 @@ UPositionalSphereCollider::UPositionalSphereCollider()
 Ref<Collider> UPositionalSphereCollider::CreateCollider(Positional::World *world, const Ref<Body> &body, const FTransform &transform)
 {
 	const auto pos = transform.GetTranslation() + Center;
-	return world->createSphereCollider(body, ToVec3(pos), Radius, Density, StaticFriction, DynamicFriction, Bounciness);
+	return world->createCollider<SphereCollider>(body, ToVec3(pos), Quat::identity, Density, StaticFriction, DynamicFriction, Bounciness, Radius);
 }
 
 void UPositionalSphereCollider::SyncTransform(const FTransform& transform)

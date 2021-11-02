@@ -16,6 +16,11 @@
 #include "EditorStyleSet.h"
 #include "Widgets/SWidget.h"
 
+#include "PositionalBoxCollider.h"
+#include "PositionalSphereCollider.h"
+#include "PositionalCapsuleCollider.h"
+#include "PositionalCylinderCollider.h"
+
 FPositionalColliderVisualizer::FPositionalColliderVisualizer()
 	: FComponentVisualizer()
 {
@@ -70,6 +75,22 @@ void FPositionalColliderVisualizer::DrawVisualization(const UActorComponent *Com
 		auto rot = transform.GetRotation() * capsule->Rotation.Quaternion();
 
 		DrawCapsule(PDI, pos, rot, rad, len);
+
+		PDI->SetHitProxy(nullptr);
+		return;
+	}
+
+	if (const auto *cylinder = Cast<UPositionalCylinderCollider>(Component))
+	{
+		PDI->SetHitProxy(new HComponentVisProxy(Component, HPP_Wireframe));
+
+		auto transform = cylinder->GetOwner()->GetActorTransform();
+		auto rad = cylinder->Radius;
+		auto len = cylinder->Length;
+		auto pos = transform.TransformPositionNoScale(cylinder->Center);
+		auto rot = transform.GetRotation() * cylinder->Rotation.Quaternion();
+
+		DrawCylinder(PDI, pos, rot, rad, len);
 
 		PDI->SetHitProxy(nullptr);
 		return;
@@ -136,18 +157,43 @@ void FPositionalColliderVisualizer::DrawBox(FPrimitiveDrawInterface *PDI, const 
 
 void FPositionalColliderVisualizer::DrawCapsule(FPrimitiveDrawInterface *PDI, const FVector &pos, const FQuat &rot, const float &radius, const float &length)
 {
-	auto p0 = pos + rot * FVector(0.F, length * 0.5F, 0.F);
+	auto v = rot * FVector(length * 0.5F, 0.F, 0.F);
+	auto p0 = pos + v;
 
-	DrawCircle(PDI, p0, rot * FQuat(FVector::XAxisVector, PI * 0.5F), radius, PI * 2.F, 32);
-	DrawCircle(PDI, p0, rot, radius, PI, 16);
-	DrawCircle(PDI, p0, rot * FQuat(FVector::YAxisVector, PI * 0.5F), radius, PI, 16);
+	auto xRot = FQuat(FVector::XAxisVector, PI * 0.5F);
+	auto yRot = rot * FQuat(FVector::YAxisVector, PI * 0.5F);
+	auto zRot = rot * FQuat(FVector::ZAxisVector, PI * 0.5F);
 
-	auto p1 = pos - rot * FVector(0.F, length * 0.5F, 0.F);
-	DrawCircle(PDI, p1, rot * FQuat(FVector::XAxisVector, PI * 0.5F), radius, PI * 2.F, 32);
-	DrawCircle(PDI, p1, rot, radius, -PI, 16);
-	DrawCircle(PDI, p1, rot * FQuat(FVector::YAxisVector, PI * 0.5F), radius, -PI, 16);
+	DrawCircle(PDI, p0, yRot, radius, PI * 2.F, 32);
+	DrawCircle(PDI, p0, zRot, radius, -PI, 16);
+	DrawCircle(PDI, p0, yRot * xRot, radius, PI, 16);
 
-	auto x = rot * FVector(radius, 0.F, 0.F);
+	auto p1 = pos - v;
+	DrawCircle(PDI, p1, yRot, radius, PI * 2.F, 32);
+	DrawCircle(PDI, p1, zRot, radius, PI, 16);
+	DrawCircle(PDI, p1, yRot * xRot, radius, -PI, 16);
+
+	auto x = rot * FVector(0.F, radius, 0.F);
+	PDI->DrawLine(p0 + x, p1 + x, FLinearColor::Black, SDPG_Foreground);
+	PDI->DrawLine(p0 - x, p1 - x, FLinearColor::Black, SDPG_Foreground);
+
+	auto z = rot * FVector(0.F, 0.F, radius);
+	PDI->DrawLine(p0 + z, p1 + z, FLinearColor::Black, SDPG_Foreground);
+	PDI->DrawLine(p0 - z, p1 - z, FLinearColor::Black, SDPG_Foreground);
+}
+
+void FPositionalColliderVisualizer::DrawCylinder(FPrimitiveDrawInterface *PDI, const FVector &pos, const FQuat &rot, const float &radius, const float &length)
+{
+	auto v = rot * FVector(length * 0.5F, 0.F, 0.F);
+	auto p0 = pos + v;
+
+	auto yRot = rot * FQuat(FVector::YAxisVector, PI * 0.5F);
+	DrawCircle(PDI, p0, yRot, radius, PI * 2.F, 32);
+
+	auto p1 = pos - v;
+	DrawCircle(PDI, p1, yRot, radius, PI * 2.F, 32);
+
+	auto x = rot * FVector(0.F, radius, 0.F);
 	PDI->DrawLine(p0 + x, p1 + x, FLinearColor::Black, SDPG_Foreground);
 	PDI->DrawLine(p0 - x, p1 - x, FLinearColor::Black, SDPG_Foreground);
 

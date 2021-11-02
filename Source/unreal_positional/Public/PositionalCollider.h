@@ -8,7 +8,7 @@
 #include "PositionalRigidBody.h"
 #include "PositionalCollider.generated.h"
 
-UCLASS(ClassGroup = (Custom), Abstract)
+UCLASS(ClassGroup = (Positional), Abstract)
 class UNREAL_POSITIONAL_API UPositionalCollider : public UActorComponent
 {
 	friend class APositionalWorld;
@@ -16,23 +16,23 @@ class UNREAL_POSITIONAL_API UPositionalCollider : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	UPROPERTY(EditAnywhere)
-		TSoftObjectPtr<APositionalWorld> World;
+	UPROPERTY(EditAnywhere, Category="Collider")
+	TSoftObjectPtr<APositionalWorld> World;
 
-	UPROPERTY(EditAnywhere)
-		double Density;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collider|Material")
+	double Density;
 
-	UPROPERTY(EditAnywhere)
-		double StaticFriction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collider|Material")
+	double StaticFriction;
 
-	UPROPERTY(EditAnywhere)
-		double DynamicFriction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collider|Material")
+	double DynamicFriction;
 
-	UPROPERTY(EditAnywhere)
-		double Bounciness;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collider|Material")
+	double Bounciness;
 
-	UPROPERTY(EditAnywhere)
-		FVector Center;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collider|Pose")
+	FVector Center;
 
 	// Sets default values for this component's properties
 	UPositionalCollider();

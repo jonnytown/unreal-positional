@@ -28,14 +28,12 @@ void ARaycastGeomTest::Tick(float DeltaTime)
 	{
 		auto o = RayOrigin.Get()->GetActorLocation();
 		auto e = RayDirection.Get()->GetActorLocation();
+		auto n = e - o;
+		n.Normalize();
 
 		TArray<PositionalRaycastResult> results;
 		if (World.IsValid())
 		{
-			auto n = e - o;
-			n.Normalize();
-
-
 			World.Get()->Raycast(o, n, 0xFFFFFFFFui32, Distance, results);
 
 			for (const auto& r : results)
@@ -45,12 +43,10 @@ void ARaycastGeomTest::Tick(float DeltaTime)
 				FVector center, extents;
 				r.collider->GetBounds(center, extents);
 				DrawDebugBox(GetWorld(), center, extents, FColor::Green, false, -1, 1, 1);
-				DrawDebugLine(GetWorld(), o, e, results.Num() ? FColor::Green : FColor::Black, false, 0, 0U, 1);
-
 			}
 		}
 
-		DrawDebugLine(GetWorld(), o, e, results.Num() ? FColor::Green : FColor::Black, false, 0, 0, 1);
+		DrawDebugDirectionalArrow(GetWorld(), o, o + n*Distance, 10.F, results.Num() ? FColor::Green : FColor::Black, false, 0, 0, 1);
 	}
 }
 

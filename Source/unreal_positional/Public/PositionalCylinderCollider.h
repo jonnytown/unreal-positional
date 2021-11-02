@@ -4,23 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "PositionalCollider.h"
-#include "PositionalBoxCollider.generated.h"
+#include "PositionalCylinderCollider.generated.h"
 
 
 UCLASS( ClassGroup=(Positional), meta=(BlueprintSpawnableComponent) )
-class UNREAL_POSITIONAL_API UPositionalBoxCollider : public UPositionalCollider
+class UNREAL_POSITIONAL_API UPositionalCylinderCollider : public UPositionalCollider
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Collider|Pose")
-	FRotator Rotation;
+	UPROPERTY(EditAnywhere, Category="Collider|Pose")
+		FRotator Rotation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Collider|Shape")
-	FVector Extents;
+	UPROPERTY(EditAnywhere, Category="Collider|Shape")
+		double Radius;
+
+	UPROPERTY(EditAnywhere, Category="Collider|Shape")
+		double Length;
 
 	// Sets default values for this component's properties
-	UPositionalBoxCollider();
+	UPositionalCylinderCollider();
 
 protected:
 	virtual Ref<Collider> CreateCollider(Positional::World* world, const Ref<Body> &body, const FTransform& transform) override;

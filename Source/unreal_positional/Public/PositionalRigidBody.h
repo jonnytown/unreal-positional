@@ -8,7 +8,7 @@
 #include "simulation/RigidBody.h"
 #include "PositionalRigidBody.generated.h"
 
-UCLASS()
+UCLASS(ClassGroup = (Positional))
 class UNREAL_POSITIONAL_API APositionalRigidBody : public AActor
 {
 	friend class APositionalWorld;
@@ -17,9 +17,9 @@ class UNREAL_POSITIONAL_API APositionalRigidBody : public AActor
 
 	GENERATED_BODY()
 	
-public:	
-	UPROPERTY(EditAnywhere)
-		TSoftObjectPtr<APositionalWorld> World;
+public:
+	UPROPERTY(EditAnywhere, Category = "Rigid Body")
+	TSoftObjectPtr<APositionalWorld> World;
 
 	// Sets default values for this actor's properties
 	APositionalRigidBody();

@@ -9,14 +9,14 @@
 
 using namespace Positional;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Positional), meta=(BlueprintSpawnableComponent) )
 class UNREAL_POSITIONAL_API UPositionalSphereCollider : public UPositionalCollider
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere)
-		float Radius;
+	UPROPERTY(EditAnywhere, Category="Collider|Shape")
+		double Radius;
 
 	// Sets default values for this component's properties
 	UPositionalSphereCollider();

@@ -28,7 +28,7 @@ struct PositionalRaycastResult
 		distance(_distance) {}
 };
 
-UCLASS(ClassGroup = (Custom))
+UCLASS(ClassGroup = (Positional))
 class UNREAL_POSITIONAL_API APositionalWorld : public AActor
 {
 	friend class APositionalRigidBody;

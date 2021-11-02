@@ -4,6 +4,11 @@
 #include "Editor/UnrealEd/Classes/Editor/UnrealEdEngine.h"
 #include "UnrealEdGlobals.h"
 
+#include "PositionalBoxCollider.h"
+#include "PositionalSphereCollider.h"
+#include "PositionalCapsuleCollider.h"
+#include "PositionalCylinderCollider.h"
+
 IMPLEMENT_GAME_MODULE(FPositionalEditorModule, unreal_positional_editor);
 
 DEFINE_LOG_CATEGORY(PositionalEditor);
@@ -25,6 +30,7 @@ void FPositionalEditorModule::StartupModule()
             GUnrealEd->RegisterComponentVisualizer(UPositionalBoxCollider::StaticClass()->GetFName(), colliderVisualizer);
             GUnrealEd->RegisterComponentVisualizer(UPositionalSphereCollider::StaticClass()->GetFName(), colliderVisualizer);
             GUnrealEd->RegisterComponentVisualizer(UPositionalCapsuleCollider::StaticClass()->GetFName(), colliderVisualizer);
+            GUnrealEd->RegisterComponentVisualizer(UPositionalCylinderCollider::StaticClass()->GetFName(), colliderVisualizer);
             colliderVisualizer->OnRegister();
         }
     }
@@ -38,5 +44,6 @@ void FPositionalEditorModule::ShutdownModule()
         GUnrealEd->UnregisterComponentVisualizer(UPositionalBoxCollider::StaticClass()->GetFName());
         GUnrealEd->UnregisterComponentVisualizer(UPositionalSphereCollider::StaticClass()->GetFName());
         GUnrealEd->UnregisterComponentVisualizer(UPositionalCapsuleCollider::StaticClass()->GetFName());
+        GUnrealEd->UnregisterComponentVisualizer(UPositionalCylinderCollider::StaticClass()->GetFName());
     }
 }

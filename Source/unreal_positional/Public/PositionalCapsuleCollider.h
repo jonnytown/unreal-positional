@@ -7,20 +7,20 @@
 #include "PositionalCapsuleCollider.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Positional), meta=(BlueprintSpawnableComponent) )
 class UNREAL_POSITIONAL_API UPositionalCapsuleCollider : public UPositionalCollider
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere)
-		FRotator Rotation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Collider|Pose")
+	FRotator Rotation;
 
-	UPROPERTY(EditAnywhere)
-		float Radius;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Collider|Shape")
+	double Radius;
 
-	UPROPERTY(EditAnywhere)
-		float Length;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Collider|Shape")
+	double Length;
 
 	// Sets default values for this component's properties
 	UPositionalCapsuleCollider();

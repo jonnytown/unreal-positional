@@ -8,7 +8,7 @@
 #include "PositionalRigidBody.h"
 #include "PositionalConstraint.generated.h"
 
-UCLASS( ClassGroup=(Custom), Abstract )
+UCLASS( ClassGroup=(Positional), Abstract )
 class UNREAL_POSITIONAL_API UPositionalConstraint : public UActorComponent
 {
 	friend class APositionalWorld;
@@ -16,14 +16,14 @@ class UNREAL_POSITIONAL_API UPositionalConstraint : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	UPROPERTY(EditAnywhere)
-		TSoftObjectPtr<APositionalWorld> World;
+	UPROPERTY(EditAnywhere, Category = "Constraint")
+	TSoftObjectPtr<APositionalWorld> World;
 
-	UPROPERTY(EditAnywhere)
-		TSoftObjectPtr<APositionalRigidBody> ConnectedBody;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint")
+	TSoftObjectPtr<APositionalRigidBody> ConnectedBody;
 
-	UPROPERTY(EditAnywhere)
-		bool IgnoreCollisions;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint")
+	bool IgnoreCollisions;
 
 	// Sets default values for this component's properties
 	UPositionalConstraint();

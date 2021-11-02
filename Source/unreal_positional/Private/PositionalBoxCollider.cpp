@@ -2,6 +2,7 @@
 
 
 #include "PositionalBoxCollider.h"
+#include "collision/collider/BoxCollider.h"
 #include "PositionalUtil.h"
 
 // Sets default values for this component's properties
@@ -16,7 +17,7 @@ Ref<Collider> UPositionalBoxCollider::CreateCollider(Positional::World* world, c
 {
 	const auto pos = transform.GetTranslation() + Center;
 	const auto rot = FQuat(Rotation) * transform.GetRotation();
-	return world->createBoxCollider(body, ToVec3(pos), ToQuat(rot), ToVec3(Extents), Density, StaticFriction, DynamicFriction, Bounciness);
+	return world->createCollider<BoxCollider>(body, ToVec3(pos), ToQuat(rot), Density, StaticFriction, DynamicFriction, Bounciness, ToVec3(Extents));
 }
 
 void UPositionalBoxCollider::SyncTransform(const FTransform& transform)

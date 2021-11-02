@@ -218,17 +218,13 @@ void APositionalWorld::SyncTransforms()
 
 void APositionalWorld::Raycast(const FVector& rayOrigin, const FVector& rayNormal, const unsigned int& mask, const float& maxDistance, TArray<PositionalRaycastResult>& results) const
 {
-	vector<RaycastResult> worldResults;
-	m_World->raycast(Ray(ToVec3(rayOrigin), ToVec3(rayNormal)), mask, maxDistance, worldResults);
-
-	for (int i = 0, count = worldResults.size(); i < count; ++i)
-	{
-		auto comp = m_Colliders.Find(worldResults[i].collider.id());
+	m_World->raycast(Ray(ToVec3(rayOrigin), ToVec3(rayNormal)), mask, maxDistance, [&](const RaycastResult &result){
+		auto comp = m_Colliders.Find(result.collider.id());
 		if (comp)
 		{
-			results.Emplace(*comp, ToFVector(worldResults[i].point), ToFVector(worldResults[i].normal), worldResults[i].distance);
+			results.Emplace(*comp, ToFVector(result.point), ToFVector(result.normal), result.distance);
 		}
-	}
+	});
 }
 
 void APositionalWorld::RegisterBody(APositionalRigidBody *body)
