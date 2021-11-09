@@ -58,7 +58,7 @@ protected:
 	void CreateCollider(const TSoftObjectPtr<APositionalWorld> &world);
 	void DestroyCollider(const TSoftObjectPtr<APositionalWorld> &world);
 
-public:	
+public:
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
 #if WITH_EDITOR

@@ -104,6 +104,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual bool ShouldTickIfViewportsOnly() const override;
+	virtual void BeginDestroy() override;
 	void SyncTransforms();
 	void Simulate();
 

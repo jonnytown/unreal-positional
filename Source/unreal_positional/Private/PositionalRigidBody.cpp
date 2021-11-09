@@ -8,7 +8,7 @@
 APositionalRigidBody::APositionalRigidBody()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 }
 
@@ -32,9 +32,22 @@ void APositionalRigidBody::DestroyBody(TSoftObjectPtr<APositionalWorld>&world)
 	}
 }
 
-void APositionalRigidBody::PreRegisterAllComponents()
+void APositionalRigidBody::PostLoad()
 {
-	Super::PreRegisterAllComponents();
+	Super::PostLoad();
+
+	/*if (!World.IsValid())
+	{
+		World = APositionalWorld::Find(GetWorld());
+	}*/
+
+	CreateBody(World);
+	
+}
+
+void APositionalRigidBody::PostActorCreated()
+{
+	Super::PostActorCreated();
 
 	if (!World.IsValid())
 	{
@@ -44,10 +57,10 @@ void APositionalRigidBody::PreRegisterAllComponents()
 	CreateBody(World);
 }
 
-void APositionalRigidBody::PostUnregisterAllComponents()
+void APositionalRigidBody::Destroyed()
 {
-	Super::PostUnregisterAllComponents();
 	DestroyBody(World);
+	Super::Destroyed();
 }
 
 #if WITH_EDITOR
@@ -82,8 +95,17 @@ void APositionalRigidBody::UpdateTransform()
 {
 	if (m_Body.valid())
 	{
-		auto& body = m_Body.get();
+		const auto& body = m_Body.get();
 		SetActorLocationAndRotation(ToFVector(body.pose.position), ToFQuaternion(body.pose.rotation));
 	}
 }
 
+void APositionalRigidBody::UpdateMass()
+{
+	if (m_Body.valid())
+	{
+		auto& body = m_Body.get();
+		body.updateMass();
+		Mass = body.invMass ? 1.0/body.invMass : 0;
+	}
+}

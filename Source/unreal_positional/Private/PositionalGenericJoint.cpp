@@ -9,7 +9,7 @@ UPositionalGenericJoint::UPositionalGenericJoint()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 }
@@ -20,8 +20,8 @@ Ref<Constraint> UPositionalGenericJoint::CreateConstraint(Positional::World *wor
 		bodyA,
 		bodyB,
 		IgnoreCollisions,
-		Pose(ToVec3(AnchorPositionA), ToQuat(AnchorRotationA.Quaternion())),
-		Pose(ToVec3(AnchorPositionB), ToQuat(AnchorRotationB.Quaternion())),
+		Pose(ToVec3(AnchorPositionA), ToQuat(AnchorRotationA)),
+		Pose(ToVec3(AnchorPositionB), ToQuat(AnchorRotationB)),
 		DOF,
 		HasLimits,
 		PositionCompliance,

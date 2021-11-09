@@ -17,6 +17,7 @@ UPositionalCollider::UPositionalCollider()
 	StaticFriction = 0.2;
 	DynamicFriction = 0.2;
 	Bounciness = 0.2;
+	
 }
 
 void UPositionalCollider::OnRegister()
@@ -33,9 +34,8 @@ void UPositionalCollider::OnRegister()
 
 void UPositionalCollider::OnUnregister()
 {
-	Super::OnUnregister();
-
 	DestroyCollider(World);
+	Super::OnUnregister();
 }
 
 void UPositionalCollider::CreateCollider(const TSoftObjectPtr<APositionalWorld> &world)
@@ -46,6 +46,10 @@ void UPositionalCollider::CreateCollider(const TSoftObjectPtr<APositionalWorld> 
 		auto body = Cast<APositionalRigidBody>(GetOwner());
 		m_Collider = CreateCollider(world.Get()->GetPtr(), body ? body->GetRef() : Body::null, GetRelativeTransform());
 		world.Get()->RegisterCollider(this);
+		if (body)
+		{
+			body->UpdateMass();
+		}
 	}
 }
 
@@ -78,7 +82,11 @@ void UPositionalCollider::PostEditChangeProperty(FPropertyChangedEvent& Property
 	if (m_Collider.valid() && name == TEXT("Density") && m_Collider.get().body().valid())
 	{
 		m_Collider.get().density = Density;
-		m_Collider.get().body().get().updateMass();
+		auto body = Cast<APositionalRigidBody>(GetOwner());
+		if (body)
+		{
+			body->UpdateMass();
+		}
 		return;
 	}
 
@@ -110,7 +118,9 @@ FTransform UPositionalCollider::GetRelativeTransform() const
 	{
 		return FTransform::Identity;
 	}
-	return GetOwner()->GetActorTransform();
+	auto transform = GetOwner()->GetActorTransform();
+	transform.RemoveScaling();
+	return transform;
 }
 
 void UPositionalCollider::SyncTransform()

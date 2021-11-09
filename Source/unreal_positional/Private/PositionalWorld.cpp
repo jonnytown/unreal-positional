@@ -256,3 +256,23 @@ void APositionalWorld::DeregisterConstraint(UPositionalConstraint *constraint)
 {
 	m_Constraints.Remove(constraint->GetRef().id());
 }
+
+void APositionalWorld::BeginDestroy()
+{
+	for (const auto &elem : m_Colliders)
+	{
+		elem.Value->World.Reset();
+	}
+
+	for (const auto &elem : m_RigidBodies)
+	{
+		elem.Value->World.Reset();
+	}
+
+	for (const auto &elem : m_Constraints)
+	{
+		elem.Value->World.Reset();
+	}
+
+	Super::BeginDestroy();
+}
