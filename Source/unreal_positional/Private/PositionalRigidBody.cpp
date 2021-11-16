@@ -86,6 +86,7 @@ void APositionalRigidBody::SyncTransform()
 	{
 		auto& body = m_Body.get();
 		auto transform = GetActorTransform();
+		transform.RemoveScaling();
 		body.pose.position = ToVec3(transform.GetTranslation());
 		body.pose.rotation = ToQuat(transform.GetRotation());
 	}

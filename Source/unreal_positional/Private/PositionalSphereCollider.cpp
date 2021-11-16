@@ -14,7 +14,7 @@ UPositionalSphereCollider::UPositionalSphereCollider()
 
 Ref<Collider> UPositionalSphereCollider::CreateCollider(Positional::World *world, const Ref<Body> &body, const FTransform &transform)
 {
-	const auto pos = transform.GetTranslation() + Center;
+	const auto pos = transform.TransformPosition(Center);
 	return world->createCollider<SphereCollider>(body, ToVec3(pos), Quat::identity, Density, StaticFriction, DynamicFriction, Bounciness, Radius);
 }
 
@@ -22,7 +22,7 @@ void UPositionalSphereCollider::SyncTransform(const FTransform& transform)
 {
 	if (m_Collider.valid())
 	{
-		m_Collider.get().pose.position = ToVec3(transform.GetTranslation() + Center);
+		m_Collider.get().pose.position = ToVec3(transform.TransformPosition(Center));
 	}
 }
 

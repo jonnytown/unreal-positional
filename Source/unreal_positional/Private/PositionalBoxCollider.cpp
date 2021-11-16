@@ -15,8 +15,8 @@ UPositionalBoxCollider::UPositionalBoxCollider()
 
 Ref<Collider> UPositionalBoxCollider::CreateCollider(Positional::World* world, const Ref<Body> &body, const FTransform& transform)
 {
-	const auto pos = transform.GetTranslation() + Center;
-	const auto rot = FQuat(Rotation) * transform.GetRotation();
+	const auto pos = transform.TransformPosition(Center);
+	const auto rot = transform.GetRotation() * Rotation.Quaternion();
 	return world->createCollider<BoxCollider>(body, ToVec3(pos), ToQuat(rot), Density, StaticFriction, DynamicFriction, Bounciness, ToVec3(Extents));
 }
 
@@ -25,7 +25,7 @@ void UPositionalBoxCollider::SyncTransform(const FTransform& transform)
 	if (m_Collider.valid())
 	{
 		auto& collider = m_Collider.get();
-		collider.pose.position = ToVec3(transform.GetTranslation() + Center);
+		collider.pose.position = ToVec3(transform.TransformPosition(Center));
 		collider.pose.rotation = ToQuat(transform.GetRotation() * Rotation.Quaternion());
 	}
 }
