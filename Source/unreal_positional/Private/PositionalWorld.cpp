@@ -8,7 +8,10 @@
 #include "PositionalRigidBody.h"
 #include "PositionalConstraint.h"
 #include "collision/narrowphase/Penetration.h"
+#include "collision/narrowphase/Simplex.h"
+#include "collision/narrowphase/Polytope.h"
 #include "TimerManager.h"
+#include "PositionalDrawDebug.h"
 
 // Sets default values
 APositionalWorld::APositionalWorld()
@@ -153,25 +156,24 @@ void APositionalWorld::Tick(float dt)
 				const Collider& a = pair.first.get();
 				const Collider& b = pair.second.get();
 
-				Collision::Simplex simplex;
-				bool colliding = Collision::Penetration::gjk(a, b, simplex);
+				Collision::GJK_EPA_CSO cso;
+				bool colliding = Collision::Penetration::gjk(a, b, cso);
 
 				UInt8 nearDim, nearIdx;
-				Vec3 near = simplex.nearest(nearDim, nearIdx);
+				Vec3 near = Collision::Simplex::nearest(cso, nearDim, nearIdx);
 
 				if (colliding)
 				{
-					Collision::Polytope polytope(simplex.vertices, simplex.verticesA, simplex.verticesB);
 					ContactPoint contact;
-					Collision::Penetration::epa(a, b, simplex.count, polytope, contact);
+					Collision::Penetration::epa(a, b, cso, contact);
 
-					Collision::DrawDebugPolytope(GetWorld(), polytope, FColor::Magenta, 1U, 1.0F);
+					DrawDebugPolytope(GetWorld(), cso, FColor::Magenta, 1U, 1.0F);
 				}
 
 				DrawDebugPoint(GetWorld(), FVector::ZeroVector, 5.0f, FColor::Black, false, -1, 1U);
 
 				const auto color = colliding ? FColor::Green : FColor::Red;
-				Collision::DrawDebugSimplex(GetWorld(), simplex.vertices, simplex.count - 1, 0, color, 2U, 0.5f);
+				DrawDebugSimplex(GetWorld(), cso.vertices, cso.vertCount - 1, 0, color, 2U, 0.5f);
 				DrawDebugPoint(GetWorld(), ToFVector(near), 5.0f, color, false, -1, 1);
 			}
 		});

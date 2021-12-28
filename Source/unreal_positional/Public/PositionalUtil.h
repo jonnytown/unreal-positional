@@ -4,6 +4,7 @@
 #include "Math/Quat.h"
 #include "Math/UnrealMathUtility.h"
 #include "DrawDebugHelpers.h"
+#include "collision/narrowphase/Penetration.h"
 
 class UWorld;
 
@@ -35,12 +36,5 @@ namespace Positional
 	inline FQuat ToFQuaternion(const Quat& q)
 	{
 		return FQuat(q.x, q.y, q.z, q.w);
-	}
-
-	namespace Collision
-	{
-		struct Polytope;
-		int DrawDebugSimplex(UWorld* world, const Vec3 simplex[4], const uint8& dim, const uint8& index, const FColor& color, const uint8& depthPiority, const float& thickness);
-		int DrawDebugPolytope(UWorld* world, const  Polytope& polytope, const FColor& color, const uint8& depthPiority, const float& thickness);
 	}
 }
